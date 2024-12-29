@@ -4,7 +4,11 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.Sprite;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 /**
@@ -17,7 +21,15 @@ public class GameScreen implements Screen {
     private final OrthographicCamera camera;
     private final BitmapFont font;
 
-    private float sinusInput = 0f;
+    private Sprite mainCharacter;
+    private Animation<TextureRegion> currentAnimation;
+    private float stateTime;
+    private boolean isMoving;
+    private Direction direction;
+
+    private enum Direction {
+        DOWN, RIGHT, UP, LEFT
+    }
 
     /**
      * Constructor for GameScreen. Sets up the camera and font.
@@ -26,6 +38,11 @@ public class GameScreen implements Screen {
      */
     public GameScreen(MazeRunnerGame game) {
         this.game = game;
+        this.mainCharacter = game.getMainCharacter();
+        this.currentAnimation = game.getCharacterDownAnimation();
+        this.stateTime = 0f;
+        this.isMoving = false;
+        this.direction = Direction.DOWN;
 
         // Create and configure the camera for the game view
         camera = new OrthographicCamera();
@@ -36,42 +53,61 @@ public class GameScreen implements Screen {
         font = game.getSkin().getFont("font");
     }
 
-
     // Screen interface methods with necessary functionality
     @Override
     public void render(float delta) {
-        // Check for escape key press to go back to the menu
-        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            game.goToMenu();
-        }
-
+        input(delta);
         ScreenUtils.clear(0, 0, 0, 1); // Clear the screen
 
         camera.update(); // Update the camera
 
-        // Move text in a circular path to have an example of a moving object
-        sinusInput += delta;
-        float textX = (float) (camera.position.x + Math.sin(sinusInput) * 100);
-        float textY = (float) (camera.position.y + Math.cos(sinusInput) * 100);
-
         // Set up and begin drawing with the sprite batch
-        game.getSpriteBatch().setProjectionMatrix(camera.combined);
+        SpriteBatch batch = game.getSpriteBatch();
+        batch.setProjectionMatrix(camera.combined);
 
-        game.getSpriteBatch().begin(); // Important to call this before drawing anything
+        batch.begin(); // Important to call this before drawing anything
 
-        // Render the text
-        font.draw(game.getSpriteBatch(), "Press ESC to go to menu", textX, textY);
+        if (isMoving) {
+            stateTime += delta;
+            TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
+            batch.draw(currentFrame, mainCharacter.getX(), mainCharacter.getY(), mainCharacter.getWidth(), mainCharacter.getHeight());
+        } else {
+            mainCharacter.draw(batch);
+        }
 
-        // Draw the character next to the text :) / We can reuse sinusInput here
-        game.getSpriteBatch().draw(
-                game.getCharacterDownAnimation().getKeyFrame(sinusInput, true),
-                textX - 96,
-                textY - 64,
-                64,
-                128
-        );
+        batch.end(); // Important to call this after drawing everything
+    }
 
-        game.getSpriteBatch().end(); // Important to call this after drawing everything
+    private void input(float delta) {
+        float speed = 100f;
+        isMoving = false;
+
+        // TODO: Observe how this changes when replacing ifs with a switch-case structure
+        if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
+            mainCharacter.translateX(speed * delta);
+            currentAnimation = game.getCharacterRightAnimation();
+            direction = Direction.RIGHT;
+            isMoving = true;
+        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
+            mainCharacter.translateY(-speed * delta);
+            currentAnimation = game.getCharacterDownAnimation();
+            direction = Direction.DOWN;
+            isMoving = true;
+        } else if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
+            mainCharacter.translateX(-speed * delta);
+            currentAnimation = game.getCharacterLeftAnimation();
+            direction = Direction.LEFT;
+            isMoving = true;
+        } else if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
+            mainCharacter.translateY(speed * delta);
+            currentAnimation = game.getCharacterUpAnimation();
+            direction = Direction.UP;
+            isMoving = true;
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            game.goToMenu();
+        }
     }
 
     @Override
@@ -89,7 +125,6 @@ public class GameScreen implements Screen {
 
     @Override
     public void show() {
-
     }
 
     @Override
@@ -99,6 +134,4 @@ public class GameScreen implements Screen {
     @Override
     public void dispose() {
     }
-
-    // Additional methods and logic can be added as needed for the game screen
 }
