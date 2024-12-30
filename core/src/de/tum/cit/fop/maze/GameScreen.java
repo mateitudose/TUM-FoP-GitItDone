@@ -1,7 +1,5 @@
 package de.tum.cit.fop.maze;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
@@ -18,7 +16,6 @@ public class GameScreen implements Screen {
     public GameScreen(MazeRunnerGame game) {
         this.game = game;
         this.mainCharacter = new MainCharacter(
-                game.getMainCharacter(),
                 game.getCharacterDownAnimation(),
                 game.getCharacterRightAnimation(),
                 game.getCharacterUpAnimation(),

@@ -2,6 +2,7 @@ package de.tum.cit.fop.maze;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -18,12 +19,20 @@ public class MainCharacter {
         DOWN, RIGHT, UP, LEFT
     }
 
-    public MainCharacter(Sprite mainCharacter, Animation<TextureRegion> downAnimation, Animation<TextureRegion> rightAnimation, Animation<TextureRegion> upAnimation, Animation<TextureRegion> leftAnimation) {
-        this.mainCharacter = mainCharacter;
+    public MainCharacter(Animation<TextureRegion> downAnimation, Animation<TextureRegion> rightAnimation, Animation<TextureRegion> upAnimation, Animation<TextureRegion> leftAnimation) {
         this.currentAnimation = downAnimation;
         this.stateTime = 0f;
         this.isMoving = false;
         this.direction = Direction.DOWN;
+        this.mainCharacter = loadCharacter();
+    }
+
+    private Sprite loadCharacter() {
+        Texture characterSheet = new Texture(Gdx.files.internal("character.png"));
+        TextureRegion characterTexture = new TextureRegion(characterSheet, 0, 0, 16, 32);
+        Sprite sprite = new Sprite(characterTexture);
+        sprite.setSize(80, 160);
+        return sprite;
     }
 
     public void update(float delta, MazeRunnerGame game) {
