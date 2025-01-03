@@ -13,7 +13,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 
 public class Player {
-    private static final float MOVE_SPEED = 2.0f;
+    private static final float MOVE_SPEED = 100.0f;
     private final World world;
     private final Sprite sprite;
     private Animation<TextureRegion> characterDownAnimation;
@@ -24,11 +24,8 @@ public class Player {
 
     private float stateTime = 0f;
     private String currentDirection = "down";  // Default direction
+    private boolean isMoving = false;  // Flag to check if player is moving
 
-    /**
-     * Constructor for the Player class.
-     * @param world
-     */
     public Player(World world) {
         this.world = world;
 
@@ -40,15 +37,11 @@ public class Player {
         this.body = createPlayerBody();
     }
 
-    /**
-     * Load the character sprite from the character.png file.
-     * @return The character sprite.
-     */
     private Sprite loadCharacter() {
         Texture characterSheet = new Texture(Gdx.files.internal("character.png"));
         TextureRegion characterTexture = new TextureRegion(characterSheet, 0, 0, 16, 32);
         Sprite sprite = new Sprite(characterTexture);
-        sprite.setSize(16, 32);
+        sprite.setSize(48, 96);
         return sprite;
     }
 
@@ -82,7 +75,7 @@ public class Player {
     private Body createPlayerBody() {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(2, 2);  // Start at some position (in meters)
+        bodyDef.position.set(200, 200);  // Start at some position (in meters)
 
         // Create the body in the world
         Body body = world.createBody(bodyDef);
@@ -110,8 +103,11 @@ public class Player {
         // Update state time for animations
         stateTime += delta;
 
-        // Handle keyboard input for movement
+        // Track movement status
         Vector2 velocity = body.getLinearVelocity();
+        isMoving = velocity.x != 0 || velocity.y != 0;  // Check if the player is moving
+
+        // Handle keyboard input for movement
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             body.setLinearVelocity(-MOVE_SPEED, velocity.y);
             currentDirection = "left";
@@ -128,31 +124,36 @@ public class Player {
             body.setLinearVelocity(0, 0);  // No movement if no keys are pressed
         }
 
-        // Update sprite to show the correct animation
+        // Update sprite to show the correct animation or static frame when idle
         updateAnimation();
     }
 
     private void updateAnimation() {
         Animation<TextureRegion> currentAnimation = null;
 
-        switch (currentDirection) {
-            case "down":
-                currentAnimation = characterDownAnimation;
-                break;
-            case "up":
-                currentAnimation = characterUpAnimation;
-                break;
-            case "right":
-                currentAnimation = characterRightAnimation;
-                break;
-            case "left":
-                currentAnimation = characterLeftAnimation;
-                break;
-        }
+        if (isMoving) {
+            switch (currentDirection) {
+                case "down":
+                    currentAnimation = characterDownAnimation;
+                    break;
+                case "up":
+                    currentAnimation = characterUpAnimation;
+                    break;
+                case "right":
+                    currentAnimation = characterRightAnimation;
+                    break;
+                case "left":
+                    currentAnimation = characterLeftAnimation;
+                    break;
+            }
 
-        // Set the current frame of the animation
-        TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
-        sprite.setRegion(currentFrame);
+            // Set the current frame of the animation
+            TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
+            sprite.setRegion(currentFrame);
+        } else {
+            // When idle, set to the first frame of the down animation (static)
+            sprite.setRegion(characterDownAnimation.getKeyFrame(0));  // Use first frame as idle state
+        }
     }
 
     public void render(SpriteBatch batch) {

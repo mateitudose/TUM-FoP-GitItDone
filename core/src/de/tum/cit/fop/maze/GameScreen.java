@@ -25,7 +25,7 @@ public class GameScreen implements Screen {
         viewport = new ScreenViewport(camera);
         camera.setToOrtho(false);
         Box2D.init();
-        gameWorld = new World(new Vector2(0, -10), true);
+        gameWorld = new World(new Vector2(0, 0), true);
         batch = new SpriteBatch();
 
         // Load the maze map (100x100 grid)
