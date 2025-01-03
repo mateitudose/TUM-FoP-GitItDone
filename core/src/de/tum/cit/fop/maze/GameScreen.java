@@ -17,6 +17,7 @@ public class GameScreen implements Screen {
     private final World gameWorld;
     private final SpriteBatch batch;
     private final MazeMap mazeMap;
+    private final Player player;
 
     public GameScreen(MazeRunnerGame game) {
         this.game = game;
@@ -27,8 +28,11 @@ public class GameScreen implements Screen {
         gameWorld = new World(new Vector2(0, -10), true);
         batch = new SpriteBatch();
 
-        // Load the maze map (10x10 grid)
-        mazeMap = new MazeMap("basictiles.png", 50, 50);
+        // Load the maze map (100x100 grid)
+        mazeMap = new MazeMap("basictiles.png", 100, 100);
+
+        // Create the player
+        player = new Player(gameWorld);
     }
 
     @Override
@@ -40,33 +44,35 @@ public class GameScreen implements Screen {
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
 
-        // Render the maze map
+        // Update player
+        player.update(delta);
+
+        // Render the maze
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         mazeMap.render(batch);
+
+        // Render the player
+        player.render(batch);
         batch.end();
 
-        // Update world
+        // Update Box2D world
         gameWorld.step(1 / 60f, 6, 2);
     }
 
     @Override
     public void resize(int width, int height) {
-        camera.setToOrtho(false);
         viewport.update(width, height, true);
     }
 
     @Override
-    public void pause() {
-    }
+    public void pause() {}
 
     @Override
-    public void resume() {
-    }
+    public void resume() {}
 
     @Override
-    public void hide() {
-    }
+    public void hide() {}
 
     @Override
     public void dispose() {
