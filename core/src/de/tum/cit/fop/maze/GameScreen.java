@@ -14,8 +14,8 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class GameScreen implements Screen {
     private static final float CAMERA_ZOOM_SPEED = 0.02f;
-    private static final float MIN_ZOOM = 0.5f;
-    private static final float MAX_ZOOM = 2.0f;
+    private static final float MIN_ZOOM = 0.75f;
+    private static final float MAX_ZOOM = 1.25f;
 
     private final MazeRunnerGame game;
     private final OrthographicCamera camera;
@@ -36,7 +36,7 @@ public class GameScreen implements Screen {
         gameWorld = new World(new Vector2(0, 0), true);
         batch = new SpriteBatch();
 
-        // Load the maze map (100x100 grid)
+        // Load the maze map (490x840 grid)
         mazeMap = new MazeMap("basictiles.png", 490, 840);
 
         // Create the player

@@ -16,98 +16,75 @@ public class Player {
     private static final float MOVE_SPEED = 100.0f;
     private final World world;
     private final Sprite sprite;
-    private Animation<TextureRegion> characterDownAnimation;
-    private Animation<TextureRegion> characterUpAnimation;
-    private Animation<TextureRegion> characterRightAnimation;
-    private Animation<TextureRegion> characterLeftAnimation;
+    private Animation<TextureRegion> downAnim, upAnim, rightAnim, leftAnim;
     private final Body body;
 
     private float stateTime = 0f;
-    private String currentDirection = "down";  // Default direction
-    private boolean isMoving = false;  // Flag to check if player is moving
+    private String currentDirection = "down";
+    private boolean isMoving = false;
 
     public Player(World world) {
         this.world = world;
-
-        // Load the character texture and animations
         this.sprite = loadCharacter();
-        loadCharacterAnimations();
-
-        // Create Box2D Body for the player
-        this.body = createPlayerBody();
+        loadAnimations();
+        this.body = createBody();
     }
 
     private Sprite loadCharacter() {
         Texture characterSheet = new Texture(Gdx.files.internal("character.png"));
-        TextureRegion characterTexture = new TextureRegion(characterSheet, 0, 0, 16, 32);
-        Sprite sprite = new Sprite(characterTexture);
+        Sprite sprite = new Sprite(new TextureRegion(characterSheet, 0, 0, 16, 32));
         sprite.setSize(48, 96);
         return sprite;
     }
 
-    private void loadCharacterAnimations() {
+    private void loadAnimations() {
         Texture characterSheet = new Texture(Gdx.files.internal("character.png"));
+        int frameWidth = 16, frameHeight = 32, frames = 4;
 
-        int frameWidth = 16;
-        int frameHeight = 32;
-        int animationFrames = 4;
+        Array<TextureRegion> downFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> rightFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> upFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> leftFrames = new Array<>(TextureRegion.class);
 
-        // libGDX internal Array instead of ArrayList because of performance
-        Array<TextureRegion> walkFramesDown = new Array<>(TextureRegion.class);
-        Array<TextureRegion> walkFramesRight = new Array<>(TextureRegion.class);
-        Array<TextureRegion> walkFramesUp = new Array<>(TextureRegion.class);
-        Array<TextureRegion> walkFramesLeft = new Array<>(TextureRegion.class);
-
-        // Add all frames to the animation
-        for (int col = 0; col < animationFrames; col++) {
-            walkFramesDown.add(new TextureRegion(characterSheet, col * frameWidth, 0, frameWidth, frameHeight));
-            walkFramesRight.add(new TextureRegion(characterSheet, col * frameWidth, frameHeight, frameWidth, frameHeight));
-            walkFramesUp.add(new TextureRegion(characterSheet, col * frameWidth, 2 * frameHeight, frameWidth, frameHeight));
-            walkFramesLeft.add(new TextureRegion(characterSheet, col * frameWidth, 3 * frameHeight, frameWidth, frameHeight));
+        for (int col = 0; col < frames; col++) {
+            downFrames.add(new TextureRegion(characterSheet, col * frameWidth, 0, frameWidth, frameHeight));
+            rightFrames.add(new TextureRegion(characterSheet, col * frameWidth, frameHeight, frameWidth, frameHeight));
+            upFrames.add(new TextureRegion(characterSheet, col * frameWidth, 2 * frameHeight, frameWidth, frameHeight));
+            leftFrames.add(new TextureRegion(characterSheet, col * frameWidth, 3 * frameHeight, frameWidth, frameHeight));
         }
 
-        characterDownAnimation = new Animation<>(0.1f, walkFramesDown);
-        characterRightAnimation = new Animation<>(0.1f, walkFramesRight);
-        characterUpAnimation = new Animation<>(0.1f, walkFramesUp);
-        characterLeftAnimation = new Animation<>(0.1f, walkFramesLeft);
+        downAnim = new Animation<>(0.1f, downFrames);
+        rightAnim = new Animation<>(0.1f, rightFrames);
+        upAnim = new Animation<>(0.1f, upFrames);
+        leftAnim = new Animation<>(0.1f, leftFrames);
     }
 
-    private Body createPlayerBody() {
+    private Body createBody() {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(1600, 800);  // Start at some position (in meters)
+        bodyDef.position.set(1600, 800);
 
-        // Create the body in the world
         Body body = world.createBody(bodyDef);
 
-        // Define a box shape for the player
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(0.5f, 1.0f);  // Set the box size (half width and full height)
+        shape.setAsBox(0.5f, 1.0f);
 
-        // Define the fixture (collisions)
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1.0f;
         fixtureDef.friction = 0.5f;
 
-        // Attach the fixture to the body
         body.createFixture(fixtureDef);
-
-        // Dispose of the shape (no longer needed after fixture is created)
         shape.dispose();
 
         return body;
     }
 
     public void update(float delta) {
-        // Update state time for animations
         stateTime += delta;
-
-        // Track movement status
         Vector2 velocity = body.getLinearVelocity();
-        isMoving = velocity.x != 0 || velocity.y != 0;  // Check if the player is moving
+        isMoving = velocity.x != 0 || velocity.y != 0;
 
-        // Handle keyboard input for movement
         if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             body.setLinearVelocity(-MOVE_SPEED, velocity.y);
             currentDirection = "left";
@@ -121,10 +98,9 @@ public class Player {
             body.setLinearVelocity(velocity.x, -MOVE_SPEED);
             currentDirection = "down";
         } else {
-            body.setLinearVelocity(0, 0);  // No movement if no keys are pressed
+            body.setLinearVelocity(0, 0);
         }
 
-        // Update sprite to show the correct animation or static frame when idle
         updateAnimation();
     }
 
@@ -134,71 +110,30 @@ public class Player {
         if (isMoving) {
             switch (currentDirection) {
                 case "down":
-                    currentAnimation = characterDownAnimation;
+                    currentAnimation = downAnim;
                     break;
                 case "up":
-                    currentAnimation = characterUpAnimation;
+                    currentAnimation = upAnim;
                     break;
                 case "right":
-                    currentAnimation = characterRightAnimation;
+                    currentAnimation = rightAnim;
                     break;
                 case "left":
-                    currentAnimation = characterLeftAnimation;
+                    currentAnimation = leftAnim;
                     break;
             }
-
-            // Set the current frame of the animation
-            TextureRegion currentFrame = currentAnimation.getKeyFrame(stateTime, true);
-            sprite.setRegion(currentFrame);
+            sprite.setRegion(currentAnimation.getKeyFrame(stateTime, true));
         } else {
-            // When idle, set to the first frame of the down animation (static)
-            sprite.setRegion(characterDownAnimation.getKeyFrame(0));  // Use first frame as idle state
+            sprite.setRegion(downAnim.getKeyFrame(0));
         }
     }
 
     public void render(SpriteBatch batch) {
-        // Render the sprite
         sprite.setPosition(body.getPosition().x - sprite.getWidth() / 2, body.getPosition().y - sprite.getHeight() / 2);
         sprite.draw(batch);
     }
 
-    public World getWorld() {
-        return world;
-    }
-
-    public Sprite getSprite() {
-        return sprite;
-    }
-
-    public Animation<TextureRegion> getCharacterDownAnimation() {
-        return characterDownAnimation;
-    }
-
-    public Animation<TextureRegion> getCharacterUpAnimation() {
-        return characterUpAnimation;
-    }
-
-    public Animation<TextureRegion> getCharacterRightAnimation() {
-        return characterRightAnimation;
-    }
-
-    public Animation<TextureRegion> getCharacterLeftAnimation() {
-        return characterLeftAnimation;
-    }
-
     public Body getBody() {
         return body;
-    }
-
-    public float getStateTime() {
-        return stateTime;
-    }
-
-    public String getCurrentDirection() {
-        return currentDirection;
-    }
-
-    public boolean isMoving() {
-        return isMoving;
     }
 }
