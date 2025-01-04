@@ -1,0 +1,13 @@
+world.png
+size:1024,512
+repeat:none
+carpets
+bounds:532,164,128,288
+furniture
+bounds:196,66,128,64
+objects
+bounds:2,132,528,320
+things
+bounds:2,2,192,128
+walls_floor_doors
+bounds:662,372,128,80

@@ -13,7 +13,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 
 public class Player {
-    private static final float MOVE_SPEED = 100.0f;
+    private static final float MOVE_SPEED = 50.0f;
     private final World world;
     private final Sprite sprite;
     private Animation<TextureRegion> downAnim, upAnim, rightAnim, leftAnim;
@@ -33,7 +33,7 @@ public class Player {
     private Sprite loadCharacter() {
         Texture characterSheet = new Texture(Gdx.files.internal("character.png"));
         Sprite sprite = new Sprite(new TextureRegion(characterSheet, 0, 0, 16, 32));
-        sprite.setSize(48, 96);
+        sprite.setSize(16, 32);
         return sprite;
     }
 
