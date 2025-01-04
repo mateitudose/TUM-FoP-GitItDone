@@ -75,7 +75,7 @@ public class Player {
     private Body createPlayerBody() {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(200, 200);  // Start at some position (in meters)
+        bodyDef.position.set(800, 400);  // Start at some position (in meters)
 
         // Create the body in the world
         Body body = world.createBody(bodyDef);
@@ -160,5 +160,45 @@ public class Player {
         // Render the sprite
         sprite.setPosition(body.getPosition().x - sprite.getWidth() / 2, body.getPosition().y - sprite.getHeight() / 2);
         sprite.draw(batch);
+    }
+
+    public World getWorld() {
+        return world;
+    }
+
+    public Sprite getSprite() {
+        return sprite;
+    }
+
+    public Animation<TextureRegion> getCharacterDownAnimation() {
+        return characterDownAnimation;
+    }
+
+    public Animation<TextureRegion> getCharacterUpAnimation() {
+        return characterUpAnimation;
+    }
+
+    public Animation<TextureRegion> getCharacterRightAnimation() {
+        return characterRightAnimation;
+    }
+
+    public Animation<TextureRegion> getCharacterLeftAnimation() {
+        return characterLeftAnimation;
+    }
+
+    public Body getBody() {
+        return body;
+    }
+
+    public float getStateTime() {
+        return stateTime;
+    }
+
+    public String getCurrentDirection() {
+        return currentDirection;
+    }
+
+    public boolean isMoving() {
+        return isMoving;
     }
 }

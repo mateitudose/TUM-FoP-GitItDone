@@ -91,6 +91,14 @@ public class MazeRunnerGame extends Game {
         return skin;
     }
 
+    public MenuScreen getMenuScreen() {
+        return menuScreen;
+    }
+
+    public GameScreen getGameScreen() {
+        return gameScreen;
+    }
+
     public SpriteBatch getSpriteBatch() {
         return spriteBatch;
     }
