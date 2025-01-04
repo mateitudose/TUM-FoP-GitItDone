@@ -83,7 +83,7 @@ public class MazeMap {
                 if (mazeGrid[y][x] == 0) {
                     tile = carpetTiles[1][1]; // Example: Floor tile
                 } else {
-                    tile = wallTiles[0][3]; // Example: Wall tile
+                    tile = wallTiles[3][1]; // Example: Wall tile
                 }
                 batch.draw(tile, x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
             }

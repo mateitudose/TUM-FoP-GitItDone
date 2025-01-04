@@ -13,7 +13,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 
 public class Player {
-    private static final float MOVE_SPEED = 50.0f;
+    private static final float MOVE_SPEED = 30.0f;
     private final World world;
     private final Sprite sprite;
     private Animation<TextureRegion> downAnim, upAnim, rightAnim, leftAnim;
