@@ -75,7 +75,7 @@ public class Player {
     private Body createPlayerBody() {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(800, 400);  // Start at some position (in meters)
+        bodyDef.position.set(1600, 800);  // Start at some position (in meters)
 
         // Create the body in the world
         Body body = world.createBody(bodyDef);

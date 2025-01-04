@@ -14,8 +14,8 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class GameScreen implements Screen {
     private static final float CAMERA_ZOOM_SPEED = 0.02f;
-    private static final float MIN_ZOOM = 0.75f;
-    private static final float MAX_ZOOM = 1.25f;
+    private static final float MIN_ZOOM = 0.5f;
+    private static final float MAX_ZOOM = 2.0f;
 
     private final MazeRunnerGame game;
     private final OrthographicCamera camera;
@@ -24,6 +24,8 @@ public class GameScreen implements Screen {
     private final SpriteBatch batch;
     private final MazeMap mazeMap;
     private final Player player;
+
+    private long resizeEndTime = 0;
 
     public GameScreen(MazeRunnerGame game) {
         this.game = game;
@@ -53,6 +55,12 @@ public class GameScreen implements Screen {
         // Update player
         player.update(delta);
 
+        // Check if resizing is complete
+        if (resizeEndTime > 0 && System.currentTimeMillis() > resizeEndTime) {
+            recenterCameraOnPlayer();
+            resizeEndTime = 0; // Reset the resize timer
+        }
+
         // Update the camera position
         updateCamera();
 
@@ -76,27 +84,6 @@ public class GameScreen implements Screen {
         // Update camera position to follow the player
         camera.position.lerp(new Vector3(playerPosition.x, playerPosition.y, 0), 0.1f);
 
-        // Ensure the player remains within the middle 80% of the screen
-        float screenWidth = viewport.getWorldWidth();
-        float screenHeight = viewport.getWorldHeight();
-
-        float leftBound = camera.position.x - screenWidth * 0.4f;
-        float rightBound = camera.position.x + screenWidth * 0.4f;
-        float bottomBound = camera.position.y - screenHeight * 0.4f;
-        float topBound = camera.position.y + screenHeight * 0.4f;
-
-        if (playerPosition.x < leftBound) {
-            camera.position.x = playerPosition.x + screenWidth * 0.4f;
-        } else if (playerPosition.x > rightBound) {
-            camera.position.x = playerPosition.x - screenWidth * 0.4f;
-        }
-
-        if (playerPosition.y < bottomBound) {
-            camera.position.y = playerPosition.y + screenHeight * 0.4f;
-        } else if (playerPosition.y > topBound) {
-            camera.position.y = playerPosition.y - screenHeight * 0.4f;
-        }
-
         // Handle zoom functionality
         if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
             camera.zoom += CAMERA_ZOOM_SPEED;
@@ -111,10 +98,16 @@ public class GameScreen implements Screen {
         camera.update();
     }
 
+    private void recenterCameraOnPlayer() {
+        Vector2 playerPosition = player.getBody().getPosition();
+        camera.position.set(playerPosition.x, playerPosition.y, 0);
+        camera.update();
+    }
+
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
-        camera.update();
+        resizeEndTime = System.currentTimeMillis() + 2000; // Set a short delay (2s) after resizing
     }
 
     @Override
