@@ -13,27 +13,31 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 
 public class Player {
-    private static final float MOVE_SPEED = 30.0f;
-    private final World world;
+    private static final float MOVE_SPEED = 2.0f;
+    private float speed;
+    private World world;
     private final Sprite sprite;
     private Animation<TextureRegion> downAnim, upAnim, rightAnim, leftAnim;
     private final Body body;
+    private MazeMap mazeMap;
 
     private float stateTime = 0f;
     private String currentDirection = "down";
     private boolean isMoving = false;
 
-    public Player(World world) {
+    public Player(World world, MazeMap mazeMap, Vector2 startPosition) {
         this.world = world;
+        this.mazeMap = mazeMap;
         this.sprite = loadCharacter();
         loadAnimations();
-        this.body = createBody();
+        this.body = createBody(startPosition);
+        this.speed = MOVE_SPEED;
     }
 
     private Sprite loadCharacter() {
         Texture characterSheet = new Texture(Gdx.files.internal("character.png"));
         Sprite sprite = new Sprite(new TextureRegion(characterSheet, 0, 0, 16, 32));
-        sprite.setSize(16, 32);
+        sprite.setSize(12, 24);
         return sprite;
     }
 
@@ -59,46 +63,80 @@ public class Player {
         leftAnim = new Animation<>(0.1f, leftFrames);
     }
 
-    private Body createBody() {
+    private Body createBody(Vector2 startPosition) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(1600, 800);
+        Vector2 safeStartPosition = new Vector2(startPosition.x, startPosition.y);
+        bodyDef.position.set(safeStartPosition);
 
         Body body = world.createBody(bodyDef);
 
         PolygonShape shape = new PolygonShape();
-        shape.setAsBox(0.5f, 1.0f);
+        float collisionWidth = (sprite.getWidth() / 2f) / MazeMap.TILE_SIZE * 0.9f;
+        float collisionHeight = (sprite.getHeight() / 2f) / MazeMap.TILE_SIZE * 0.4f;
+
+        Vector2 center = new Vector2(0, -collisionHeight * 0.7f); // Offset down from center
+        shape.setAsBox(collisionWidth, collisionHeight, center, 0);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1.0f;
-        fixtureDef.friction = 0.5f;
+        fixtureDef.friction = 1.0f;
 
-        body.createFixture(fixtureDef);
+        fixtureDef.filter.categoryBits = 0x0001; // Player category
+        fixtureDef.filter.maskBits = 0x0002;    // Collision with walls
+
+        Fixture fixture = body.createFixture(fixtureDef);
+        fixture.setSensor(true); // Temporarily disable collision
+
+        body.setUserData("Player");
+        body.setFixedRotation(true);
         shape.dispose();
+        Gdx.app.postRunnable(() -> fixture.setSensor(false));
 
         return body;
     }
 
     public void update(float delta) {
         stateTime += delta;
+
+        Vector2 position = body.getPosition();
+        float clampedX = Math.max(0.5f, Math.min(position.x, mazeMap.getMazeWidth() - 0.5f));
+        float clampedY = Math.max(0.5f, Math.min(position.y, mazeMap.getMazeHeight() - 0.5f));
+
+        if (position.x != clampedX || position.y != clampedY) {
+            body.setTransform(clampedX, clampedY, body.getAngle());
+        }
+
         Vector2 velocity = body.getLinearVelocity();
         isMoving = velocity.x != 0 || velocity.y != 0;
 
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            body.setLinearVelocity(-MOVE_SPEED, velocity.y);
+        // Check for Shift key to boost speed
+        float effectiveSpeed = speed;
+        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)) {
+            effectiveSpeed *= 2;
+        }
+
+        float velX = 0, velY = 0;
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            velX = -effectiveSpeed;
             currentDirection = "left";
-        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            body.setLinearVelocity(MOVE_SPEED, velocity.y);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            velX = effectiveSpeed;
             currentDirection = "right";
-        } else if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            body.setLinearVelocity(velocity.x, MOVE_SPEED);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            velY = effectiveSpeed;
             currentDirection = "up";
-        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            body.setLinearVelocity(velocity.x, -MOVE_SPEED);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            velY = -effectiveSpeed;
             currentDirection = "down";
-        } else {
+        }
+
+        // Set velocity to zero if no movement keys are pressed
+        if (velX == 0 && velY == 0) {
             body.setLinearVelocity(0, 0);
+        } else {
+            body.setLinearVelocity(velX, velY);
         }
 
         updateAnimation();
@@ -125,15 +163,21 @@ public class Player {
             sprite.setRegion(currentAnimation.getKeyFrame(stateTime, true));
         } else {
             sprite.setRegion(downAnim.getKeyFrame(0));
+            stateTime = 0;
         }
     }
 
     public void render(SpriteBatch batch) {
-        sprite.setPosition(body.getPosition().x - sprite.getWidth() / 2, body.getPosition().y - sprite.getHeight() / 2);
+        // Set sprite position to center around the Box2D body
+        float spriteX = body.getPosition().x * MazeMap.TILE_SIZE - sprite.getWidth() / 2f;
+        float spriteY = body.getPosition().y * MazeMap.TILE_SIZE - sprite.getHeight() / 2f;
+
+        sprite.setPosition(spriteX, spriteY);
         sprite.draw(batch);
     }
 
     public Body getBody() {
         return body;
     }
+
 }

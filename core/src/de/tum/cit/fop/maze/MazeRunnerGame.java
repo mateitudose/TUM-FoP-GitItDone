@@ -2,6 +2,7 @@ package de.tum.cit.fop.maze;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -19,6 +20,7 @@ import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 public class MazeRunnerGame extends Game {
     // Screens
     private MenuScreen menuScreen;
+    private MapSelectionScreen mapSelectionScreen;
     private GameScreen gameScreen;
 
     // Sprite Batch for rendering
@@ -50,7 +52,7 @@ public class MazeRunnerGame extends Game {
         backgroundMusic.setLooping(true);
 //        backgroundMusic.play();
 
-        goToGame(); // Navigate to the menu screen
+        goToMenu();
     }
 
     /**
@@ -64,11 +66,19 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    public void goToMapSelection() {
+        if (mapSelectionScreen == null) {
+            mapSelectionScreen = new MapSelectionScreen(this);
+        }
+        this.setScreen(mapSelectionScreen);
+        disposeScreen(gameScreen);
+    }
+
     /**
      * Switches to the game screen.
      */
-    public void goToGame() {
-        this.setScreen(new GameScreen(this)); // Set the current screen to GameScreen
+    public void goToGame(String mapPath) {
+        this.setScreen(new GameScreen(this, mapPath)); // Set the current screen to GameScreen
         if (menuScreen != null) {
             menuScreen.dispose(); // Dispose the menu screen if it exists
             menuScreen = null;
@@ -80,10 +90,27 @@ public class MazeRunnerGame extends Game {
      */
     @Override
     public void dispose() {
+        disposeScreen(menuScreen);
+        disposeScreen(mapSelectionScreen);
+        disposeScreen(gameScreen);
         getScreen().hide(); // Hide the current screen
         getScreen().dispose(); // Dispose the current screen
         spriteBatch.dispose(); // Dispose the spriteBatch
         skin.dispose(); // Dispose the skin
+    }
+
+    private void disposeScreen(Screen screen) {
+        if (screen != null) {
+            screen.dispose();
+        }
+    }
+
+    public void goToVictory() {
+        this.setScreen(new VictoryScreen(this));
+    }
+
+    public void goToGameOver(String mapPath) {
+//        this.setScreen(new GameOverScreen(this, mapPath));
     }
 
     // Getter methods

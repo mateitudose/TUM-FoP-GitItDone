@@ -41,12 +41,13 @@ public class MenuScreen implements Screen {
         table.add(new Label("Hello World from the Menu!", game.getSkin(), "title")).padBottom(80).row();
 
         // Create and add a button to go to the game screen
-        TextButton goToGameButton = new TextButton("Go To Game", game.getSkin());
-        table.add(goToGameButton).width(300).row();
-        goToGameButton.addListener(new ChangeListener() {
+        TextButton goToMapSelectionButton = new TextButton("Select Map", game.getSkin());
+        table.add(goToMapSelectionButton).width(300).row();
+
+        goToMapSelectionButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.goToGame(); // Change to the game screen when button is pressed
+                game.goToMapSelection();
             }
         });
     }
