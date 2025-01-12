@@ -110,7 +110,7 @@ public class MazeRunnerGame extends Game {
     }
 
     public void goToGameOver(String mapPath) {
-        this.setScreen(new GameOverScreen(this, mapPath));
+//        this.setScreen(new GameOverScreen(this, mapPath));
     }
 
     // Getter methods

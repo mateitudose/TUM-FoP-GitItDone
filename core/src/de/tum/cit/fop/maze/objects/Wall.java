@@ -9,6 +9,7 @@ import de.tum.cit.fop.maze.MazeMap;
  */
 public class Wall extends GameObject {
     private World world;
+
     public Wall(int x, int y, int size, TextureRegion texture, World world) {
         super(x, y, size, texture);
         this.world = world;
@@ -19,7 +20,7 @@ public class Wall extends GameObject {
 
         // Center of the tile
         bodyDef.position.set(
-                (x + 0.5f) * MazeMap.TILE_SIZE / MazeMap.TILE_SIZE, // Center within the tile
+                (x + 0.5f) * MazeMap.TILE_SIZE / MazeMap.TILE_SIZE,
                 (y + 0.5f) * MazeMap.TILE_SIZE / MazeMap.TILE_SIZE
         );
 
@@ -29,8 +30,8 @@ public class Wall extends GameObject {
 
         // Wall size in Box2D world units
         // Shrink the collision box size for the wall
-        float collisionWidth = (size / 2f) / MazeMap.TILE_SIZE;  // 90% of tile size
-        float collisionHeight = (size / 2f) / MazeMap.TILE_SIZE; // 90% of tile size
+        float collisionWidth = (size / 2f) / MazeMap.TILE_SIZE;
+        float collisionHeight = (size / 2f) / MazeMap.TILE_SIZE;
 
         shape.setAsBox(collisionWidth, collisionHeight);
 
@@ -39,8 +40,8 @@ public class Wall extends GameObject {
         fixtureDef.density = 0.0f;
         fixtureDef.filter.categoryBits = 0x0002; // Wall category
         fixtureDef.filter.maskBits = 0x0001;    // Collides with player
-        fixtureDef.friction = 0.5f;
-        body.setUserData("Wall " + x + " - " + y);
+        fixtureDef.friction = 1.0f;
+        body.setUserData("Wall " + x + "," + y);
 
         body.createFixture(fixtureDef);
         shape.dispose();

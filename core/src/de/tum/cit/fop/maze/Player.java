@@ -13,7 +13,7 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 
 public class Player {
-    private static final float MOVE_SPEED = 5.0f;
+    private static final float MOVE_SPEED = 2.0f;
     private float speed;
     private World world;
     private final Sprite sprite;
@@ -37,7 +37,7 @@ public class Player {
     private Sprite loadCharacter() {
         Texture characterSheet = new Texture(Gdx.files.internal("character.png"));
         Sprite sprite = new Sprite(new TextureRegion(characterSheet, 0, 0, 16, 32));
-        sprite.setSize(16, 32);// ask Matei
+        sprite.setSize(12, 24);
         return sprite;
     }
 
@@ -66,23 +66,22 @@ public class Player {
     private Body createBody(Vector2 startPosition) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        Vector2 safeStartPosition = new Vector2(
-                startPosition.x,
-                startPosition.y
-        );
+        Vector2 safeStartPosition = new Vector2(startPosition.x, startPosition.y);
         bodyDef.position.set(safeStartPosition);
 
         Body body = world.createBody(bodyDef);
 
         PolygonShape shape = new PolygonShape();
-        float collisionWidth = (sprite.getWidth() / 2f) / MazeMap.TILE_SIZE;
-        float collisionHeight = (sprite.getHeight() / 2f) / MazeMap.TILE_SIZE * 0.2f; // if 16x32 must be like this otherwise, the player is too big
-        shape.setAsBox(collisionWidth, collisionHeight);
+        float collisionWidth = (sprite.getWidth() / 2f) / MazeMap.TILE_SIZE * 0.9f;
+        float collisionHeight = (sprite.getHeight() / 2f) / MazeMap.TILE_SIZE * 0.4f;
+
+        Vector2 center = new Vector2(0, -collisionHeight * 0.7f); // Offset down from center
+        shape.setAsBox(collisionWidth, collisionHeight, center, 0);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1.0f;
-        fixtureDef.friction = 0.5f;
+        fixtureDef.friction = 1.0f;
 
         fixtureDef.filter.categoryBits = 0x0001; // Player category
         fixtureDef.filter.maskBits = 0x0002;    // Collision with walls
@@ -91,30 +90,15 @@ public class Player {
         fixture.setSensor(true); // Temporarily disable collision
 
         body.setUserData("Player");
-
-        body.createFixture(fixtureDef);
-
+        body.setFixedRotation(true);
         shape.dispose();
-
         Gdx.app.postRunnable(() -> fixture.setSensor(false));
-
-        System.out.println("Player body created with size: "
-                + (MazeMap.TILE_SIZE / 2f) + "x" + (MazeMap.TILE_SIZE / 2f)
-                + " at position: " + bodyDef.position);
-
-        System.out.println("Box2D shape dimensions (half-width x half-height): " +
-                (sprite.getWidth() / 2f) / MazeMap.TILE_SIZE + " x " +
-                (sprite.getHeight() / 2f) / MazeMap.TILE_SIZE);
 
         return body;
     }
 
     public void update(float delta) {
         stateTime += delta;
-
-        if (stateTime < 0.1f) {
-            return;
-        }
 
         Vector2 position = body.getPosition();
         float clampedX = Math.max(0.5f, Math.min(position.x, mazeMap.getMazeWidth() - 0.5f));
@@ -130,25 +114,30 @@ public class Player {
         // Check for Shift key to boost speed
         float effectiveSpeed = speed;
         if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)) {
-            effectiveSpeed *= 2; // Double the speed
+            effectiveSpeed *= 2;
         }
 
-        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
-            body.setLinearVelocity(-effectiveSpeed, velocity.y);
+        float velX = 0, velY = 0;
+        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+            velX = -effectiveSpeed;
             currentDirection = "left";
-        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
-            body.setLinearVelocity(effectiveSpeed, velocity.y);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+            velX = effectiveSpeed;
             currentDirection = "right";
-        } else if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
-            body.setLinearVelocity(velocity.x, effectiveSpeed);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+            velY = effectiveSpeed;
             currentDirection = "up";
-        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
-            body.setLinearVelocity(velocity.x, -effectiveSpeed);
+        } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+            velY = -effectiveSpeed;
             currentDirection = "down";
-        } else {
-            body.setLinearVelocity(0, 0);
         }
 
+        // Set velocity to zero if no movement keys are pressed
+        if (velX == 0 && velY == 0) {
+            body.setLinearVelocity(0, 0);
+        } else {
+            body.setLinearVelocity(velX, velY);
+        }
 
         updateAnimation();
     }
@@ -174,6 +163,7 @@ public class Player {
             sprite.setRegion(currentAnimation.getKeyFrame(stateTime, true));
         } else {
             sprite.setRegion(downAnim.getKeyFrame(0));
+            stateTime = 0;
         }
     }
 

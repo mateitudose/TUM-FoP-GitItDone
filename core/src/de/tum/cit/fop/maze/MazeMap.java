@@ -23,7 +23,7 @@ public class MazeMap {
     private String mapPath;
     private World world;
     public int entryX, entryY;
-    public static final int TILE_SIZE = 16; // Tile size in pixels
+    public static final int TILE_SIZE = 16;
     private final TextureRegion wallTexture;
     private final TextureRegion entryTexture;
     private final TextureRegion exitTexture;
@@ -81,8 +81,8 @@ public class MazeMap {
             props.load(Gdx.files.internal(filePath).reader());
 
             // Minimum maze dimensions
-           // int minCols = 32;
-           // int minRows = 18;
+            // int minCols = 32;
+            // int minRows = 18;
 
             // Find maximum x and y from the property file
             int maxX = 0;
@@ -95,7 +95,7 @@ public class MazeMap {
                 if (x > maxX) maxX = x;
                 if (y > maxY) maxY = y;
             }
-            //dont delete the padding again
+            // Don't delete the padding again
             // Add padding of 2 to max dimensions
             maxX += 1;
             maxY += 1;
@@ -125,7 +125,7 @@ public class MazeMap {
                                     hasEntry = true;
                                     entryX = x;
                                     entryY = y;
-                                }else{
+                                } else {
                                     gameObjects.put(key, new Wall(x, y, TILE_SIZE, wallTexture, world));
                                 }
                             }
@@ -149,14 +149,12 @@ public class MazeMap {
             addOuterWalls();
             if (!hasEntry) addEntryPoint();
             if (!hasExit) addExitPoint();
-
             if (!hasEntry) {
                 throw new IllegalStateException("No entry point defined in the maze file!");
             }
             if (!hasExit) {
                 throw new IllegalStateException("No exit point defined in the maze file!");
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -189,7 +187,6 @@ public class MazeMap {
                 }
             }
         }
-
         System.out.println("No suitable position found for Entry Point!");
     }
 
@@ -206,7 +203,6 @@ public class MazeMap {
                 }
             }
         }
-
         System.out.println("No suitable position found for Exit Point!");
     }
 
@@ -256,7 +252,8 @@ public class MazeMap {
                 return object;
             }
         }
-        return null; // No object found at the given position
+        // No object found at the given position
+        return null;
     }
 
     public Array<Vector2> getExitPositions() {
