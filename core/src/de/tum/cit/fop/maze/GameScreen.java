@@ -3,6 +3,7 @@ package de.tum.cit.fop.maze;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
@@ -17,6 +18,8 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.objects.EntryPoint;
 import de.tum.cit.fop.maze.objects.GameObject;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+
+import java.util.List;
 
 
 public class GameScreen implements Screen {
@@ -111,21 +114,25 @@ public class GameScreen implements Screen {
     }
 
     private Vector2 findEntryPoint() {
-        for (GameObject object : mazeMap.getGameObjects().values()) {
-            if (object instanceof EntryPoint) {
-                int entryX = object.getX();
-                int entryY = object.getY();
+        for (List<GameObject> objects : mazeMap.getGameObjects().values()) {
+            for (GameObject object : objects) {
+                if (object instanceof EntryPoint) {
+                    int entryX = object.getX();
+                    int entryY = object.getY();
 
-                // Check if the entry position overlaps a wall
-                if (mazeMap.isWall(entryX, entryY)) {
-                    throw new IllegalStateException("Entry point overlaps a wall at: " + entryX + ", " + entryY);
+                    // Check if the entry position overlaps a wall
+                    if (mazeMap.isWall(entryX, entryY)) {
+                        throw new IllegalStateException("Entry point overlaps a wall at: " + entryX + ", " + entryY);
+                    }
+
+                    return new Vector2(entryX, entryY);
                 }
-
-                return new Vector2(entryX, entryY);
             }
         }
         throw new IllegalStateException("No EntryPoint found in the maze!");
     }
+
+
 
     @Override
     public void render(float delta) {
@@ -147,10 +154,14 @@ public class GameScreen implements Screen {
 
         // Render the maze
         batch.setProjectionMatrix(camera.combined);
+
         batch.begin();
-        for (GameObject object : mazeMap.getGameObjects().values()) {
-            object.render(batch);
+        for (List<GameObject> objectList : mazeMap.getGameObjects().values()) {
+            for (GameObject object : objectList) {
+                object.render(batch);
+            }
         }
+
         player.render(batch);
         batch.end();
 

@@ -1,6 +1,8 @@
 world.png
 size:1024,512
 repeat:none
+basictiles
+bounds:662,212,128,240
 carpets
 bounds:532,164,128,288
 furniture
@@ -10,4 +12,4 @@ bounds:2,132,528,320
 things
 bounds:2,2,192,128
 walls_floor_doors
-bounds:662,372,128,80
+bounds:792,372,128,80
