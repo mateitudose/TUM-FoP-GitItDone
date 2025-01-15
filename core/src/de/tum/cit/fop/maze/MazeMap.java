@@ -18,7 +18,7 @@ public class MazeMap {
     private final TextureRegion[][] furnitureTiles;
     private final TextureRegion[][] thingTiles;
     private final TextureRegion[][] objectTiles;
-    private final TextureRegion[][] grasTiles;
+    private final TextureRegion[][] grassTiles;
     private final TextureRegion tree1Texture;
     private final TextureRegion tree2Texture;
     private final Map<String, List<GameObject>> gameObjects = new HashMap<>();
@@ -28,15 +28,28 @@ public class MazeMap {
     private World world;
     public int entryX, entryY;
     public static final int TILE_SIZE = 16;
-    private final TextureRegion wallTexture;
     private final TextureRegion entryTexture;
     private final TextureRegion exitTexture;
     private final TextureRegion trapTexture;
     private final TextureRegion enemyTexture;
     private final TextureRegion keyTexture;
     private final TextureRegion pathTexture;
-    private final TextureRegion grasTexture;
-    private final TextureRegion wallDownTexture;
+    private final TextureRegion grassTexture;
+    private final TextureRegion wallHorTexture;
+    private final TextureRegion wallVerTexture;
+    private final TextureRegion cornerRUTexture;
+    private final TextureRegion cornerRDTexture;
+    private final TextureRegion cornerLUTexture;
+    private final TextureRegion cornerLDTexture;
+
+    public enum WallType {
+        HORIZONTAL,
+        VERTICAL,
+        CORNER_LU, //corner left up
+        CORNER_RU, // corner right up
+        CORNER_LD, // corner left down
+        CORNER_RD //corner right down
+    }
 
     public MazeMap(String mapPath, int windowWidth, int windowHeight, World world) {
         // Load textures
@@ -46,21 +59,27 @@ public class MazeMap {
         furnitureTiles = splitRegion(atlas.findRegion("furniture"), TILE_SIZE, TILE_SIZE);
         thingTiles = splitRegion(atlas.findRegion("things"), TILE_SIZE, TILE_SIZE);
         objectTiles = splitRegion(atlas.findRegion("objects"), TILE_SIZE, TILE_SIZE);
-        grasTiles = splitRegion(atlas.findRegion("basictiles"), TILE_SIZE, TILE_SIZE);
+        grassTiles = splitRegion(atlas.findRegion("basictiles"), TILE_SIZE, TILE_SIZE);
         this.world = world;
 
         // Assign specific textures
-        wallTexture = wallTiles[3][1]; // Example: Wall texture
+        //wallTexture = wallTiles[3][1]; // Example: Wall texture
         entryTexture = carpetTiles[6][2]; // Example: Entry point texture
         exitTexture = carpetTiles[12][2]; // Example: Exit texture
         trapTexture = thingTiles[6][0]; // Example: Trap texture
         enemyTexture = thingTiles[3][11]; // Example: Enemy texture
         keyTexture = thingTiles[0][7]; // Example: Key texture
         pathTexture = carpetTiles[2][2]; // CarpetTiles specifically for paths
-        grasTexture = grasTiles[8][0]; // Example: Gras texture
-        tree1Texture = grasTiles[3][6]; // Example: Tree texture
-        tree2Texture = grasTiles[4][6]; // Example: Tree texture
-        wallDownTexture = wallTiles[0][3];
+        grassTexture = grassTiles[8][0]; // Example: Grass texture
+        tree1Texture = grassTiles[3][6]; // Example: Tree texture
+        tree2Texture = grassTiles[4][6]; // Example: Tree texture
+        wallHorTexture = wallTiles[0][1]; //Example: Horizontal wall texture
+        wallVerTexture = wallTiles[1][0]; //Example: Vertical wall texture
+        cornerRUTexture = wallTiles[0][2]; //Example: Corner right up wall texture
+        cornerRDTexture = wallTiles[2][2]; //Example: Corner right down wall texture
+        cornerLUTexture = wallTiles[0][0]; //Example: Corner left up wall texture
+        cornerLDTexture = wallTiles[2][0]; //Example: Corner left down wall texture
+
         // Load the maze from the properties file
         loadMaze(mapPath, windowWidth, windowHeight);
     }
@@ -118,39 +137,35 @@ public class MazeMap {
 
             boolean hasEntry = false;
             boolean hasExit = false;
-
             for (int y = 0; y < mazeHeight; y++) {
                 for (int x = 0; x < mazeWidth; x++) {
                     String key = x + "," + y;
 
                     if (props.containsKey(key)) {
                         int type = Integer.parseInt(props.getProperty(key));
-                        // System.out.println("Creating object at (" + x + ", " + y + ") with type: " + type); // Debugging object creation
 
-                        switch (type) {
-                            case 0 -> addGameObject(key, new Wall(x, y, TILE_SIZE, wallTexture, world));
-                            case 1 -> {
-                                if (!hasEntry && !isCorner(x, y)) {
-                                    addGameObject(key, new EntryPoint(x, y, TILE_SIZE, entryTexture));
-                                    hasEntry = true;
-                                    entryX = x;
-                                    entryY = y;
-                                } else {
-                                    addGameObject(key, new Wall(x, y, TILE_SIZE, wallTexture, world));
+                        if (type != 0) { // Skip walls for now
+                            switch (type) {
+                                case 1 -> {
+                                    if (!hasEntry && !isCorner(x, y)) {
+                                        addGameObject(key, new EntryPoint(x, y, TILE_SIZE, entryTexture));
+                                        hasEntry = true;
+                                        entryX = x;
+                                        entryY = y;
+                                    }
                                 }
-                            }
-                            case 2 -> {
-                                if (!isCorner(x, y)) {
-                                    addGameObject(key, new ExitPoint(x, y, TILE_SIZE, exitTexture));
-                                    hasExit = true;
+                                case 2 -> {
+                                    if (!isCorner(x, y)) {
+                                        addGameObject(key, new ExitPoint(x, y, TILE_SIZE, exitTexture));
+                                        hasExit = true;
+                                    }
                                 }
+                                case 3 -> addGameObject(key, new Trap(x, y, TILE_SIZE, trapTexture));
+                                case 4 -> addGameObject(key, new Enemy(x, y, TILE_SIZE, enemyTexture));
+                                case 5 -> addGameObject(key, new Key(x, y, TILE_SIZE, keyTexture));
                             }
-                            case 3 -> addGameObject(key, new Trap(x, y, TILE_SIZE, trapTexture));
-                            case 4 -> addGameObject(key, new Enemy(x, y, TILE_SIZE, enemyTexture));
-                            case 5 -> addGameObject(key, new Key(x, y, TILE_SIZE, keyTexture));
                         }
                     } else {
-                        // Default to path if undefined
                         addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
                     }
                 }
@@ -168,10 +183,22 @@ public class MazeMap {
             // Fill outside of the maze with grass
             fillWithGrassAndTrees(windowWidth, windowHeight);
 
+            // handle the walls
+            for (int y = 0; y < mazeHeight; y++) {
+                for (int x = 0; x < mazeWidth; x++) {
+                    String key = x + "," + y;
+                    if (props.containsKey(key) && Integer.parseInt(props.getProperty(key)) == 0 && !gameObjects.containsKey(key)) {
+                        // Start DFS from this wall
+                        DFS_Walls(key, props);
+                    }
+                }
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
+
     private void addGameObject(String key, GameObject object) {
         gameObjects.computeIfAbsent(key, k -> new ArrayList<>()).add(object);
     }
@@ -184,11 +211,11 @@ public class MazeMap {
             for (int x = -gridWidth; x < gridWidth; x++) {
 
                 String key = x + "," + y;
-                if(x >= 0 && y >= 0 && x < mazeWidth && y < mazeHeight) {
+                if (x >= 0 && y >= 0 && x < mazeWidth && y < mazeHeight) {
                     continue;
                 }
                 if (!gameObjects.containsKey(key)) {
-                    addGameObject(key, new Path(x, y, TILE_SIZE, grasTexture));//add grass
+                    addGameObject(key, new Path(x, y, TILE_SIZE, grassTexture));//add grass
                     if (Math.random() < 0.1) {
                         addGameObject(key, new Path(x, y, TILE_SIZE, tree1Texture));//add first tree
                     } else if (Math.random() < 0.05) {
@@ -199,6 +226,117 @@ public class MazeMap {
         }
     }
 
+    private void DFS_Walls(String key, Properties props) {
+        Stack<String> stack = new Stack<>();
+        Set<String> visited = new HashSet<>();
+        stack.push(key);
+        while (!stack.isEmpty()) {
+            // Get current wall
+            String current = stack.pop();
+
+            // Check if it is visited => skip
+            if (visited.contains(current))
+                continue;
+            visited.add(current);
+            String[] coords = current.split(",");
+            int x = Integer.parseInt(coords[0]); // Get x and y coordinates from current wall
+            int y = Integer.parseInt(coords[1]);
+            // Determine wall type
+            WallType wallType = findWallType(x, y, props);
+            // Get texture according to type
+            TextureRegion current_texture = getWallTexture(wallType);
+            addGameObject(current, new Wall(x, y, TILE_SIZE, current_texture, world));
+            // Add suitable neighbors to stack
+            if (isWallAt(x + 1, y, props))
+                if (!visited.contains((x + 1) + "," + y))
+                    stack.push((x + 1) + "," + y);
+            if (isWallAt(x - 1, y, props))
+                if (!visited.contains((x - 1) + "," + y))
+                    stack.push((x - 1) + "," + y);
+            if (isWallAt(x, y + 1, props))
+                if (!visited.contains(x + "," + (y + 1)))
+                    stack.push(x + "," + (y + 1));
+            if (isWallAt(x, y - 1, props))
+                if (!visited.contains(x + "," + (y - 1)))
+                    stack.push(x + "," + (y - 1));
+        }
+    }
+
+    private WallType findWallType(int x, int y, Properties props) {
+        boolean isUp = isWallAt(x, y + 1, props);
+        boolean isDown = isWallAt(x, y - 1, props);
+        boolean isRight = isWallAt(x + 1, y, props);
+        boolean isLeft = isWallAt(x - 1, y, props);
+        int neighbors_count = 0;
+        if (isUp)
+            neighbors_count++;
+        if (isDown)
+            neighbors_count++;
+        if (isLeft)
+            neighbors_count++;
+        if (isRight)
+            neighbors_count++;
+        switch (neighbors_count) {
+            case 1:
+                if (isUp)
+                    return WallType.VERTICAL;
+                if (isDown)
+                    return WallType.VERTICAL;
+                if (isRight)
+                    return WallType.HORIZONTAL;
+                if (isLeft)
+                    return WallType.HORIZONTAL;
+            case 2:
+                if (isRight && isLeft)
+                    return WallType.HORIZONTAL;
+                if (isUp && isDown)
+                    return WallType.VERTICAL;
+                if (isUp && isRight)
+                    return WallType.CORNER_LD;
+                if (isUp && isLeft)
+                    return WallType.CORNER_RD;
+                if (isDown && isRight)
+                    return WallType.CORNER_LU;
+                if (isDown && isLeft)
+                    return WallType.CORNER_RU;
+            case 3:
+                if (!isUp)
+                    return WallType.HORIZONTAL;
+                if (!isDown)
+                    return WallType.HORIZONTAL;
+                if (!isRight)
+                    return WallType.VERTICAL;
+                if (!isLeft)
+                    return WallType.VERTICAL;
+            case 4:
+                return WallType.HORIZONTAL;
+            default:
+                return WallType.HORIZONTAL;
+        }
+
+    }
+
+    private boolean isWallAt(int x, int y, Properties props) {
+        if (x < 0 || y < 0 || x >= mazeWidth || y >= mazeHeight)
+            return false; // Out of maze
+        String key = x + "," + y;
+        if (!props.containsKey(key))
+            return false; // Not a wall
+        int type = Integer.parseInt(props.getProperty(key));
+        return type == 0; // Return true if it is a wall
+    }
+
+    private TextureRegion getWallTexture(WallType type) {
+        return switch (type) {
+            case HORIZONTAL -> wallHorTexture;
+            case VERTICAL -> wallVerTexture;
+            case CORNER_LU -> cornerLUTexture;
+            case CORNER_RU -> cornerRUTexture;
+            case CORNER_LD -> cornerLDTexture;
+            case CORNER_RD -> cornerRDTexture;
+            default -> wallHorTexture;
+        };
+    }
 
     private void addOuterWalls() {
         for (int y = 0; y < mazeHeight; y++) {
@@ -206,7 +344,7 @@ public class MazeMap {
                 String key = x + "," + y;
                 if ((x == 0 || y == 0 || x == mazeWidth - 1 || y == mazeHeight - 1) &&
                         !(gameObjects.get(key) instanceof EntryPoint || gameObjects.get(key) instanceof ExitPoint)) {
-                    addGameObject(key, new Wall(x, y, TILE_SIZE, wallTexture, world));
+                    addGameObject(key, new Wall(x, y, TILE_SIZE, wallHorTexture, world));
                 }
             }
         }
@@ -281,6 +419,7 @@ public class MazeMap {
             }
         }
     }
+
     public Map<String, List<GameObject>> getGameObjects() {
         return gameObjects;
     }
