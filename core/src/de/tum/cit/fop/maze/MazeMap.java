@@ -62,7 +62,6 @@ public class MazeMap {
         grassTiles = splitRegion(atlas.findRegion("basictiles"), TILE_SIZE, TILE_SIZE);
         this.world = world;
 
-        // Assign specific textures
         //wallTexture = wallTiles[3][1]; // Example: Wall texture
         entryTexture = carpetTiles[6][2]; // Example: Entry point texture
         exitTexture = carpetTiles[12][2]; // Example: Exit texture
@@ -109,10 +108,6 @@ public class MazeMap {
             Properties props = new Properties();
             props.load(Gdx.files.internal(filePath).reader());
 
-            // Minimum maze dimensions
-            // int minCols = 32;
-            // int minRows = 18;
-
             // Find maximum x and y from the property file
             int maxX = 0;
             int maxY = 0;
@@ -124,6 +119,7 @@ public class MazeMap {
                 if (x > maxX) maxX = x;
                 if (y > maxY) maxY = y;
             }
+
             // Don't delete the padding again
             // Add padding of 2 to max dimensions
             maxX += 1;
@@ -133,7 +129,7 @@ public class MazeMap {
             mazeWidth = maxX;
             mazeHeight = maxY;
 
-            System.out.println("Maze dimensions: " + mazeWidth + "x" + mazeHeight);
+//            System.out.println("Maze dimensions: " + mazeWidth + "x" + mazeHeight);
 
             boolean hasEntry = false;
             boolean hasExit = false;
@@ -143,8 +139,8 @@ public class MazeMap {
 
                     if (props.containsKey(key)) {
                         int type = Integer.parseInt(props.getProperty(key));
-
-                        if (type != 0) { // Skip walls for now
+                        // Skip walls for now
+                        if (type != 0) {
                             switch (type) {
                                 case 1 -> {
                                     if (!hasEntry && !isCorner(x, y)) {
@@ -180,10 +176,10 @@ public class MazeMap {
             if (!hasExit) {
                 throw new IllegalStateException("No exit point defined in the maze file!");
             }
-            // Fill outside of the maze with grass
+            // Fill outside the maze with grass
             fillWithGrassAndTrees(windowWidth, windowHeight);
 
-            // handle the walls
+            // Handle the walls
             for (int y = 0; y < mazeHeight; y++) {
                 for (int x = 0; x < mazeWidth; x++) {
                     String key = x + "," + y;
@@ -204,22 +200,36 @@ public class MazeMap {
     }
 
     private void fillWithGrassAndTrees(int windowWidth, int windowHeight) {
-        int gridWidth = windowWidth / TILE_SIZE;
-        int gridHeight = windowHeight / TILE_SIZE;
+        // Calculate padding size (how far out from the maze to extend the grass)
+        int padding = Math.max(50, Math.max(mazeWidth, mazeHeight)); // At least 50 tiles or size of maze
 
-        for (int y = -gridHeight; y < gridHeight; y++) {
-            for (int x = -gridWidth; x < gridWidth; x++) {
+        // Calculate the range to fill grass (from before maze starts to after it ends)
+        int startX = -padding;
+        int endX = mazeWidth + padding;
+        int startY = -padding;
+        int endY = mazeHeight + padding;
 
+        // Fill the entire area with grass and occasional trees
+        for (int y = startY; y < endY; y++) {
+            for (int x = startX; x < endX; x++) {
                 String key = x + "," + y;
+
+                // Skip if inside the maze bounds
                 if (x >= 0 && y >= 0 && x < mazeWidth && y < mazeHeight) {
                     continue;
                 }
+
+                // Only add grass if no game object exists at this position
                 if (!gameObjects.containsKey(key)) {
-                    addGameObject(key, new Path(x, y, TILE_SIZE, grassTexture));//add grass
-                    if (Math.random() < 0.1) {
-                        addGameObject(key, new Path(x, y, TILE_SIZE, tree1Texture));//add first tree
-                    } else if (Math.random() < 0.05) {
-                        addGameObject(key, new Path(x, y, TILE_SIZE, tree2Texture));//add second tree
+                    // Add grass tile
+                    addGameObject(key, new Path(x, y, TILE_SIZE, grassTexture));
+
+                    // Add trees with reduced probability (adjusted for better distribution)
+                    double random = Math.random();
+                    if (random < 0.08) { // 8% chance for first tree type
+                        addGameObject(key, new Path(x, y, TILE_SIZE, tree1Texture));
+                    } else if (random < 0.12) { // 4% chance for second tree type
+                        addGameObject(key, new Path(x, y, TILE_SIZE, tree2Texture));
                     }
                 }
             }
@@ -351,9 +361,10 @@ public class MazeMap {
     }
 
     private void addEntryPoint() {
-        for (int x = 1; x < mazeWidth - 1; x++) { // Avoid corners
+        for (int x = 1; x < mazeWidth - 1; x++) {
             String key = x + ",0";
-            if (gameObjects.get(key) instanceof Wall) { // Check if it's a wall
+            // Check if it's a wall
+            if (gameObjects.get(key) instanceof Wall) {
                 String belowKey = x + ",1";
                 // Ensure no wall directly below the entry point
                 if (!(gameObjects.get(belowKey) instanceof Wall)) {
@@ -369,9 +380,10 @@ public class MazeMap {
     }
 
     private void addExitPoint() {
-        for (int x = 1; x < mazeWidth - 1; x++) { // Avoid corners
+        for (int x = 1; x < mazeWidth - 1; x++) {
             String key = x + "," + (mazeHeight - 1);
-            if (gameObjects.get(key) instanceof Wall) { // Check if it's a wall
+            // Check if it's a wall
+            if (gameObjects.get(key) instanceof Wall) {
                 String aboveKey = x + "," + (mazeHeight - 2);
                 // Ensure no wall directly above the exit point
                 if (!(gameObjects.get(aboveKey) instanceof Wall)) {
