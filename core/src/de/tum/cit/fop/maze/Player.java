@@ -81,7 +81,7 @@ public class Player {
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1.0f;
-        fixtureDef.friction = 1.0f;
+        fixtureDef.friction = 0.1f;
 
         fixtureDef.filter.categoryBits = 0x0001; // Player category
         fixtureDef.filter.maskBits = 0x0002;    // Collision with walls
@@ -111,6 +111,16 @@ public class Player {
         Vector2 velocity = body.getLinearVelocity();
         isMoving = velocity.x != 0 || velocity.y != 0;
 
+        // Check for wall contacts
+        boolean touchingWall = false;
+        for (Contact contact : body.getWorld().getContactList()) {
+            if (contact.isTouching() && (contact.getFixtureA().getBody() == body ||
+                    contact.getFixtureB().getBody() == body)) {
+                touchingWall = true;
+                break;
+            }
+        }
+
         // Check for Shift key to boost speed
         float effectiveSpeed = speed;
         if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)) {
@@ -137,6 +147,18 @@ public class Player {
             body.setLinearVelocity(0, 0);
         } else {
             body.setLinearVelocity(velX, velY);
+
+            // Apply slipping force when touching wall and moving
+            if (touchingWall) {
+                Vector2 movementDir = new Vector2(velX, velY).nor();
+                // Apply a force in the direction of movement to overcome wall friction
+                float slipForce = 2.0f; // Adjust this value to change the slipping strength
+                body.applyForceToCenter(movementDir.scl(slipForce), true);
+
+                // Optional: Add a small perpendicular force to help prevent sticking
+                Vector2 perpForce = new Vector2(-movementDir.y, movementDir.x).scl(0.5f);
+                body.applyForceToCenter(perpForce, true);
+            }
         }
 
         updateAnimation();

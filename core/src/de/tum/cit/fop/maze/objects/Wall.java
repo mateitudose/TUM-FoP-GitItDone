@@ -40,7 +40,7 @@ public class Wall extends GameObject {
         fixtureDef.density = 0.0f;
         fixtureDef.filter.categoryBits = 0x0002; // Wall category
         fixtureDef.filter.maskBits = 0x0001;    // Collides with player
-        fixtureDef.friction = 1.0f;
+        fixtureDef.friction = 0.0f;
         body.setUserData("Wall " + x + "," + y);
 
         body.createFixture(fixtureDef);
