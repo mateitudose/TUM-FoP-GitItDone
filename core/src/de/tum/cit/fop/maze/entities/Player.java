@@ -20,7 +20,6 @@ public class Player extends GameEntity {
     private final Sprite sprite;
     private Animation<TextureRegion> downAnim, upAnim, rightAnim, leftAnim;
     private MazeMap mazeMap;
-
     private float stateTime = 0f;
     private String currentDirection = "down";
     private boolean isMoving = false;
@@ -46,10 +45,10 @@ public class Player extends GameEntity {
         Texture characterSheet = new Texture(Gdx.files.internal("cat.png"));
         int frameWidth = 32, frameHeight = 32, frames = 4;
 
-        Array<TextureRegion> downFrames = new Array<>(TextureRegion.class);
-        Array<TextureRegion> rightFrames = new Array<>(TextureRegion.class);
-        Array<TextureRegion> upFrames = new Array<>(TextureRegion.class);
-        Array<TextureRegion> leftFrames = new Array<>(TextureRegion.class);
+        Array<TextureRegion> downFrames = new Array<>(frames);
+        Array<TextureRegion> rightFrames = new Array<>(frames);
+        Array<TextureRegion> upFrames = new Array<>(frames);
+        Array<TextureRegion> leftFrames = new Array<>(frames);
 
         for (int col = 0; col < frames; col++) {
             downFrames.add(new TextureRegion(characterSheet, (12 + col) * frameWidth, frameHeight, frameWidth, frameHeight));
@@ -72,14 +71,12 @@ public class Player extends GameEntity {
         Body body = world.createBody(bodyDef);
 
         CircleShape shape = new CircleShape();
-        float radius = (sprite.getWidth() / 2f) / MazeMap.TILE_SIZE * 0.6f;
-        shape.setRadius(radius);
+        shape.setRadius((sprite.getWidth() / 2f) / MazeMap.TILE_SIZE * 0.6f);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1.0f;
         fixtureDef.friction = 0.0f;
-
         fixtureDef.filter.categoryBits = 0x0001;
         fixtureDef.filter.maskBits = 0x0002;
 
@@ -110,15 +107,6 @@ public class Player extends GameEntity {
         Vector2 velocity = body.getLinearVelocity();
         isMoving = velocity.x != 0 || velocity.y != 0;
 
-        boolean touchingWall = false;
-        for (Contact contact : body.getWorld().getContactList()) {
-            if (contact.isTouching() && (contact.getFixtureA().getBody() == body ||
-                    contact.getFixtureB().getBody() == body)) {
-                touchingWall = true;
-                break;
-            }
-        }
-
         float effectiveSpeed = speed;
         if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)) {
             effectiveSpeed *= 2;
@@ -143,15 +131,6 @@ public class Player extends GameEntity {
             body.setLinearVelocity(0, 0);
         } else {
             body.setLinearVelocity(velX, velY);
-
-            if (touchingWall) {
-                Vector2 movementDir = new Vector2(velX, velY).nor();
-                float slipForce = 2.0f;
-                body.applyForceToCenter(movementDir.scl(slipForce), true);
-
-                Vector2 perpForce = new Vector2(-movementDir.y, movementDir.x).scl(0.5f);
-                body.applyForceToCenter(perpForce, true);
-            }
         }
 
         updateAnimation();
@@ -162,18 +141,10 @@ public class Player extends GameEntity {
 
         if (isMoving) {
             switch (currentDirection) {
-                case "down":
-                    currentAnimation = downAnim;
-                    break;
-                case "up":
-                    currentAnimation = upAnim;
-                    break;
-                case "right":
-                    currentAnimation = rightAnim;
-                    break;
-                case "left":
-                    currentAnimation = leftAnim;
-                    break;
+                case "down" -> currentAnimation = downAnim;
+                case "up" -> currentAnimation = upAnim;
+                case "right" -> currentAnimation = rightAnim;
+                case "left" -> currentAnimation = leftAnim;
             }
             sprite.setRegion(currentAnimation.getKeyFrame(stateTime, true));
         } else {

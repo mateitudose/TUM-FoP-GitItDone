@@ -18,6 +18,7 @@ import de.tum.cit.fop.maze.MazeMap;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entities.Player;
 import de.tum.cit.fop.maze.objects.EntryPoint;
+import de.tum.cit.fop.maze.objects.ExitPoint;
 import de.tum.cit.fop.maze.objects.GameObject;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 
@@ -225,13 +226,8 @@ public class GameScreen implements Screen {
     }
 
     private void checkGameStatus() {
-        Vector2 playerPosition = player.getBody().getPosition();
-        Array<Vector2> exitPositions = mazeMap.getExitPositions();
-
-        for (Vector2 exitPosition : exitPositions) {
-            if (Math.abs(playerPosition.x - (exitPosition.x + 0.5)) < 0.5f &&
-                    Math.abs(playerPosition.y - (exitPosition.y + 0.5)) < 0.5f) {
-                game.goToVictory();
+        for (ExitPoint exitPoint : mazeMap.getExitPoints()) {
+            if (exitPoint.checkIfPlayerReachedExit(player, game)) {
                 return;
             }
         }
