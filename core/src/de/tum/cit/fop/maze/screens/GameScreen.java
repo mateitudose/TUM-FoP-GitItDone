@@ -1,9 +1,8 @@
-package de.tum.cit.fop.maze;
+package de.tum.cit.fop.maze.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
@@ -15,6 +14,9 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import box2dLight.RayHandler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import de.tum.cit.fop.maze.MazeMap;
+import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.entities.Player;
 import de.tum.cit.fop.maze.objects.EntryPoint;
 import de.tum.cit.fop.maze.objects.GameObject;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;

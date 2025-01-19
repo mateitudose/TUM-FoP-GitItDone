@@ -1,13 +1,13 @@
 package de.tum.cit.fop.maze;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.utils.Array;
+import de.tum.cit.fop.maze.entities.Enemy;
 import de.tum.cit.fop.maze.objects.*;
 
 import java.util.*;
@@ -72,12 +72,12 @@ public class MazeMap {
         grassTexture = grassTiles[8][0]; // Example: Grass texture
         tree1Texture = grassTiles[3][6]; // Example: Tree texture
         tree2Texture = grassTiles[4][6]; // Example: Tree texture
-        wallHorTexture = wallTiles[0][1]; //Example: Horizontal wall texture
-        wallVerTexture = wallTiles[1][0]; //Example: Vertical wall texture
-        cornerRUTexture = wallTiles[0][2]; //Example: Corner right up wall texture
-        cornerRDTexture = wallTiles[2][2]; //Example: Corner right down wall texture
-        cornerLUTexture = wallTiles[0][0]; //Example: Corner left up wall texture
-        cornerLDTexture = wallTiles[2][0]; //Example: Corner left down wall texture
+        wallHorTexture = wallTiles[0][1]; // Example: Horizontal wall texture
+        wallVerTexture = wallTiles[1][0]; // Example: Vertical wall texture
+        cornerRUTexture = wallTiles[0][2]; // Example: Corner right up wall texture
+        cornerRDTexture = wallTiles[2][2]; // Example: Corner right down wall texture
+        cornerLUTexture = wallTiles[0][0]; // Example: Corner left up wall texture
+        cornerLDTexture = wallTiles[2][0]; // Example: Corner left down wall texture
 
         // Load the maze from the properties file
         loadMaze(mapPath, windowWidth, windowHeight);
@@ -174,7 +174,6 @@ public class MazeMap {
                 }
             }
 
-            //addOuterWalls();
             if (!hasEntry) addEntryPoint();
             if (!hasExit) addExitPoint();
             if (!hasEntry) {
@@ -192,7 +191,7 @@ public class MazeMap {
                     String key = x + "," + y;
                     if (props.containsKey(key) && Integer.parseInt(props.getProperty(key)) == 0 && !gameObjects.containsKey(key)) {
                         // Start DFS from this wall
-                        DFS_Walls(key, props);
+                        dfsWalls(key, props);
                     }
                 }
             }
@@ -243,20 +242,18 @@ public class MazeMap {
         }
     }
 
-    private void DFS_Walls(String key, Properties props) {
+    private void dfsWalls(String key, Properties props) {
         Stack<String> stack = new Stack<>();
         Set<String> visited = new HashSet<>();
         stack.push(key);
         while (!stack.isEmpty()) {
-            // Get current wall
             String current = stack.pop();
-
-            // Check if it is visited => skip
             if (visited.contains(current))
                 continue;
             visited.add(current);
+
             String[] coords = current.split(",");
-            int x = Integer.parseInt(coords[0]); // Get x and y coordinates from current wall
+            int x = Integer.parseInt(coords[0]);
             int y = Integer.parseInt(coords[1]);
             // Determine wall type
             WallType wallType = findWallType(x, y, props);
@@ -336,18 +333,6 @@ public class MazeMap {
             case CORNER_RD -> cornerRDTexture;
             default -> wallHorTexture;
         };
-    }
-
-    private void addOuterWalls() {
-        for (int y = 0; y < mazeHeight; y++) {
-            for (int x = 0; x < mazeWidth; x++) {
-                String key = x + "," + y;
-                if ((x == 0 || y == 0 || x == mazeWidth - 1 || y == mazeHeight - 1) &&
-                        !(gameObjects.get(key) instanceof EntryPoint || gameObjects.get(key) instanceof ExitPoint)) {
-                    addGameObject(key, new Wall(x, y, TILE_SIZE, wallHorTexture, world));
-                }
-            }
-        }
     }
 
     private void addEntryPoint() {

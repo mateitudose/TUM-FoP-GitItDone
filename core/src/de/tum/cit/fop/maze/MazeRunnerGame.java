@@ -2,15 +2,12 @@ package de.tum.cit.fop.maze;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import com.badlogic.gdx.utils.Array;
+import de.tum.cit.fop.maze.screens.GameScreen;
+import de.tum.cit.fop.maze.screens.MapSelectionScreen;
+import de.tum.cit.fop.maze.screens.MenuScreen;
+import de.tum.cit.fop.maze.screens.VictoryScreen;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
 /**

@@ -1,4 +1,4 @@
-package de.tum.cit.fop.maze;
+package de.tum.cit.fop.maze.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -11,14 +11,14 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
 
 import com.badlogic.gdx.utils.Array;
+import de.tum.cit.fop.maze.MazeMap;
 
-public class Player {
+public class Player extends GameEntity {
     private static final float MOVE_SPEED = 2.0f;
     private float speed;
     private World world;
     private final Sprite sprite;
     private Animation<TextureRegion> downAnim, upAnim, rightAnim, leftAnim;
-    private final Body body;
     private MazeMap mazeMap;
 
     private float stateTime = 0f;
@@ -26,6 +26,7 @@ public class Player {
     private boolean isMoving = false;
 
     public Player(World world, MazeMap mazeMap, Vector2 startPosition) {
+        super((int) startPosition.x, (int) startPosition.y, MazeMap.TILE_SIZE, null);
         this.world = world;
         this.mazeMap = mazeMap;
         this.sprite = loadCharacter();
@@ -70,11 +71,8 @@ public class Player {
 
         Body body = world.createBody(bodyDef);
 
-        // Use a circle shape for rounded collision boundaries
-        // An ellipse shape would be more accurate, but Box2D does not support it, and I am lazy to implement it
-        // Otherwise, the player may get stuck on corners: http://www.iforce2d.net/b2dtut/ghost-vertices
         CircleShape shape = new CircleShape();
-        float radius = (sprite.getWidth() / 2f) / MazeMap.TILE_SIZE * 0.6f; // Adjust radius for proper sizing
+        float radius = (sprite.getWidth() / 2f) / MazeMap.TILE_SIZE * 0.6f;
         shape.setRadius(radius);
 
         FixtureDef fixtureDef = new FixtureDef();
@@ -82,11 +80,11 @@ public class Player {
         fixtureDef.density = 1.0f;
         fixtureDef.friction = 0.0f;
 
-        fixtureDef.filter.categoryBits = 0x0001; // Player category
-        fixtureDef.filter.maskBits = 0x0002;    // Collision with walls
+        fixtureDef.filter.categoryBits = 0x0001;
+        fixtureDef.filter.maskBits = 0x0002;
 
         Fixture fixture = body.createFixture(fixtureDef);
-        fixture.setSensor(true); // Temporarily disable collision
+        fixture.setSensor(true);
 
         body.setUserData("Player");
         body.setFixedRotation(true);
@@ -97,6 +95,7 @@ public class Player {
         return body;
     }
 
+    @Override
     public void update(float delta) {
         stateTime += delta;
 
@@ -111,7 +110,6 @@ public class Player {
         Vector2 velocity = body.getLinearVelocity();
         isMoving = velocity.x != 0 || velocity.y != 0;
 
-        // Check for wall contacts
         boolean touchingWall = false;
         for (Contact contact : body.getWorld().getContactList()) {
             if (contact.isTouching() && (contact.getFixtureA().getBody() == body ||
@@ -121,7 +119,6 @@ public class Player {
             }
         }
 
-        // Check for Shift key to boost speed
         float effectiveSpeed = speed;
         if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)) {
             effectiveSpeed *= 2;
@@ -142,20 +139,16 @@ public class Player {
             currentDirection = "down";
         }
 
-        // Set velocity to zero if no movement keys are pressed
         if (velX == 0 && velY == 0) {
             body.setLinearVelocity(0, 0);
         } else {
             body.setLinearVelocity(velX, velY);
 
-            // Apply slipping force when touching wall and moving
             if (touchingWall) {
                 Vector2 movementDir = new Vector2(velX, velY).nor();
-                // Apply a force in the direction of movement to overcome wall friction
-                float slipForce = 2.0f; // Adjust this value to change the slipping strength
+                float slipForce = 2.0f;
                 body.applyForceToCenter(movementDir.scl(slipForce), true);
 
-                // Optional: Add a small perpendicular force to help prevent sticking
                 Vector2 perpForce = new Vector2(-movementDir.y, movementDir.x).scl(0.5f);
                 body.applyForceToCenter(perpForce, true);
             }
@@ -190,16 +183,10 @@ public class Player {
     }
 
     public void render(SpriteBatch batch) {
-        // Set sprite position to center around the Box2D body
         float spriteX = body.getPosition().x * MazeMap.TILE_SIZE - sprite.getWidth() / 2f;
         float spriteY = body.getPosition().y * MazeMap.TILE_SIZE - sprite.getHeight() / 2f;
 
         sprite.setPosition(spriteX, spriteY);
         sprite.draw(batch);
     }
-
-    public Body getBody() {
-        return body;
-    }
-
 }
