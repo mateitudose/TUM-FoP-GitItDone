@@ -30,7 +30,7 @@ public class VictoryScreen implements Screen {
         stage.addActor(table);
 
         // Title
-        table.add(new Label("Congratulations! You Won!", game.getSkin(), "title")).padBottom(50).row();
+        table.add(new Label("You Won!", game.getSkin(), "title")).padBottom(50).row();
 
         // Buttons
         TextButton mainMenuButton = new TextButton("Main Menu", game.getSkin());

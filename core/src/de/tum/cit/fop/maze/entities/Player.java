@@ -137,18 +137,18 @@ public class Player extends GameEntity {
     }
 
     private void updateAnimation() {
-        Animation<TextureRegion> currentAnimation = null;
+        Animation<TextureRegion> currentAnimation = switch (currentDirection) {
+            case "up" -> upAnim;
+            case "right" -> rightAnim;
+            case "left" -> leftAnim;
+            default -> downAnim;
+        };
 
         if (isMoving) {
-            switch (currentDirection) {
-                case "down" -> currentAnimation = downAnim;
-                case "up" -> currentAnimation = upAnim;
-                case "right" -> currentAnimation = rightAnim;
-                case "left" -> currentAnimation = leftAnim;
-            }
             sprite.setRegion(currentAnimation.getKeyFrame(stateTime, true));
         } else {
-            sprite.setRegion(downAnim.getKeyFrame(0));
+            // When stopping, use the first frame of the current direction's animation
+            sprite.setRegion(currentAnimation.getKeyFrame(0));
             stateTime = 0;
         }
     }

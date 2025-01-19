@@ -4,7 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import de.tum.cit.fop.maze.entities.Enemy;
 import de.tum.cit.fop.maze.objects.*;
@@ -18,7 +17,7 @@ public class MazeMap {
     private final List<ExitPoint> exitPoints = new ArrayList<>();
     private int mazeWidth, mazeHeight;
     private String mapPath;
-    private World world;
+    private final World world;
     public int entryX, entryY;
     public static final int TILE_SIZE = 16;
 
@@ -120,7 +119,7 @@ public class MazeMap {
                                 }
                                 case 5 -> {
                                     addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
-                                    addGameObject(key, new Key(x, y, TILE_SIZE, keyTexture));
+                                    addGameObject(key, new Fish(x, y));
                                 }
                             }
                         }
@@ -218,10 +217,8 @@ public class MazeMap {
                 if (isUp && isRight) yield WallType.CORNER_LD;
                 if (isUp) yield WallType.CORNER_RD;
                 if (isRight) yield WallType.CORNER_LU;
-                if (isLeft) yield WallType.CORNER_RU;
-                yield WallType.HORIZONTAL;
+                yield WallType.CORNER_RU;
             }
-            case 3, 4 -> WallType.HORIZONTAL;
             default -> WallType.HORIZONTAL;
         };
     }
