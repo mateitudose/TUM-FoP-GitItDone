@@ -288,42 +288,25 @@ public class MazeMap {
             neighbors_count++;
         switch (neighbors_count) {
             case 1:
-                if (isUp)
+                if (isUp || isDown)
                     return WallType.VERTICAL;
-                if (isDown)
-                    return WallType.VERTICAL;
-                if (isRight)
-                    return WallType.HORIZONTAL;
-                if (isLeft)
+                if (isRight || isLeft)
                     return WallType.HORIZONTAL;
             case 2:
-                if (isRight && isLeft)
-                    return WallType.HORIZONTAL;
-                if (isUp && isDown)
-                    return WallType.VERTICAL;
-                if (isUp && isRight)
-                    return WallType.CORNER_LD;
-                if (isUp && isLeft)
-                    return WallType.CORNER_RD;
-                if (isDown && isRight)
-                    return WallType.CORNER_LU;
-                if (isDown && isLeft)
-                    return WallType.CORNER_RU;
+                if (isRight && isLeft) return WallType.HORIZONTAL;
+                if (isUp && isDown) return WallType.VERTICAL;
+                if (isUp && isRight) return WallType.CORNER_LD;
+                if (isUp && isLeft) return WallType.CORNER_RD;
+                if (isDown && isRight) return WallType.CORNER_LU;
+                if (isDown && isLeft) return WallType.CORNER_RU;
             case 3:
-                if (!isUp)
-                    return WallType.HORIZONTAL;
-                if (!isDown)
-                    return WallType.HORIZONTAL;
-                if (!isRight)
-                    return WallType.VERTICAL;
-                if (!isLeft)
-                    return WallType.VERTICAL;
+                if (!isUp || !isDown) return WallType.HORIZONTAL;
+                if (!isRight || !isLeft) return WallType.VERTICAL;
             case 4:
                 return WallType.HORIZONTAL;
             default:
                 return WallType.HORIZONTAL;
         }
-
     }
 
     private boolean isWallAt(int x, int y, Properties props) {

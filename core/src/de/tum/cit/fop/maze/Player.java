@@ -35,15 +35,15 @@ public class Player {
     }
 
     private Sprite loadCharacter() {
-        Texture characterSheet = new Texture(Gdx.files.internal("character.png"));
-        Sprite sprite = new Sprite(new TextureRegion(characterSheet, 0, 0, 16, 32));
-        sprite.setSize(12, 24);
+        Texture characterSheet = new Texture(Gdx.files.internal("cat.png"));
+        Sprite sprite = new Sprite(new TextureRegion(characterSheet, 0, 32, 32, 32));
+        sprite.setSize(24, 24);
         return sprite;
     }
 
     private void loadAnimations() {
-        Texture characterSheet = new Texture(Gdx.files.internal("character.png"));
-        int frameWidth = 16, frameHeight = 32, frames = 4;
+        Texture characterSheet = new Texture(Gdx.files.internal("cat.png"));
+        int frameWidth = 32, frameHeight = 32, frames = 4;
 
         Array<TextureRegion> downFrames = new Array<>(TextureRegion.class);
         Array<TextureRegion> rightFrames = new Array<>(TextureRegion.class);
@@ -51,10 +51,10 @@ public class Player {
         Array<TextureRegion> leftFrames = new Array<>(TextureRegion.class);
 
         for (int col = 0; col < frames; col++) {
-            downFrames.add(new TextureRegion(characterSheet, col * frameWidth, 0, frameWidth, frameHeight));
-            rightFrames.add(new TextureRegion(characterSheet, col * frameWidth, frameHeight, frameWidth, frameHeight));
-            upFrames.add(new TextureRegion(characterSheet, col * frameWidth, 2 * frameHeight, frameWidth, frameHeight));
-            leftFrames.add(new TextureRegion(characterSheet, col * frameWidth, 3 * frameHeight, frameWidth, frameHeight));
+            downFrames.add(new TextureRegion(characterSheet, (12 + col) * frameWidth, frameHeight, frameWidth, frameHeight));
+            rightFrames.add(new TextureRegion(characterSheet, (12 + col) * frameWidth, 13 * frameHeight, frameWidth, frameHeight));
+            upFrames.add(new TextureRegion(characterSheet, (12 + col) * frameWidth, 9 * frameHeight, frameWidth, frameHeight));
+            leftFrames.add(new TextureRegion(characterSheet, (12 + col) * frameWidth, 5 * frameHeight, frameWidth, frameHeight));
         }
 
         downAnim = new Animation<>(0.1f, downFrames);
@@ -72,7 +72,7 @@ public class Player {
         Body body = world.createBody(bodyDef);
 
         PolygonShape shape = new PolygonShape();
-        float collisionWidth = (sprite.getWidth() / 2f) / MazeMap.TILE_SIZE * 0.9f;
+        float collisionWidth = (sprite.getWidth() / 2f) / MazeMap.TILE_SIZE * 0.55f;
         float collisionHeight = (sprite.getHeight() / 2f) / MazeMap.TILE_SIZE * 0.4f;
 
         Vector2 center = new Vector2(0, -collisionHeight * 0.7f); // Offset down from center

@@ -95,10 +95,6 @@ public class GameScreen implements Screen {
         viewport = new ScreenViewport(camera);
         viewport.update(windowWidth, windowHeight, true);
 
-//        System.out.println("Initial window size: " + windowWidth + "x" + windowHeight);
-//        System.out.println("Maze dimensions (pixels): " + mazePixelWidth + "x" + mazePixelHeight);
-//        System.out.println("Viewport dimensions: " + viewport.getWorldWidth() + "x" + viewport.getWorldHeight());
-
         batch = new SpriteBatch();
 
         // Initialize the player
