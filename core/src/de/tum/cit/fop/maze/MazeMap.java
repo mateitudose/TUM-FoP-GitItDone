@@ -129,8 +129,6 @@ public class MazeMap {
             mazeWidth = maxX;
             mazeHeight = maxY;
 
-//            System.out.println("Maze dimensions: " + mazeWidth + "x" + mazeHeight);
-
             boolean hasEntry = false;
             boolean hasExit = false;
             for (int y = 0; y < mazeHeight; y++) {
@@ -156,9 +154,18 @@ public class MazeMap {
                                         hasExit = true;
                                     }
                                 }
-                                case 3 -> addGameObject(key, new Trap(x, y, TILE_SIZE, trapTexture));
-                                case 4 -> addGameObject(key, new Enemy(x, y, TILE_SIZE, enemyTexture));
-                                case 5 -> addGameObject(key, new Key(x, y, TILE_SIZE, keyTexture));
+                                case 3 -> {
+                                    addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
+                                    addGameObject(key, new Trap(x, y, TILE_SIZE, trapTexture));
+                                }
+                                case 4 -> {
+                                    addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
+                                    addGameObject(key, new Enemy(x, y, TILE_SIZE, enemyTexture));
+                                }
+                                case 5 -> {
+                                    addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
+                                    addGameObject(key, new Key(x, y, TILE_SIZE, keyTexture));
+                                }
                             }
                         }
                     } else {

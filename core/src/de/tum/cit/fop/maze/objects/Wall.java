@@ -25,7 +25,6 @@ public class Wall extends GameObject {
         );
 
         Body body = world.createBody(bodyDef);
-
         PolygonShape shape = new PolygonShape();
 
         // Wall size in Box2D world units
