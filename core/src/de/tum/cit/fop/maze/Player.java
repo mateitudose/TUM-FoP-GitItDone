@@ -37,7 +37,7 @@ public class Player {
     private Sprite loadCharacter() {
         Texture characterSheet = new Texture(Gdx.files.internal("cat.png"));
         Sprite sprite = new Sprite(new TextureRegion(characterSheet, 0, 32, 32, 32));
-        sprite.setSize(24, 24);
+        sprite.setSize(22, 22);
         return sprite;
     }
 
@@ -66,22 +66,21 @@ public class Player {
     private Body createBody(Vector2 startPosition) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        Vector2 safeStartPosition = new Vector2(startPosition.x, startPosition.y);
-        bodyDef.position.set(safeStartPosition);
+        bodyDef.position.set(startPosition);
 
         Body body = world.createBody(bodyDef);
 
-        PolygonShape shape = new PolygonShape();
-        float collisionWidth = (sprite.getWidth() / 2f) / MazeMap.TILE_SIZE * 0.55f;
-        float collisionHeight = (sprite.getHeight() / 2f) / MazeMap.TILE_SIZE * 0.4f;
-
-        Vector2 center = new Vector2(0, -collisionHeight * 0.7f); // Offset down from center
-        shape.setAsBox(collisionWidth, collisionHeight, center, 0);
+        // Use a circle shape for rounded collision boundaries
+        // An ellipse shape would be more accurate, but Box2D does not support it, and I am lazy to implement it
+        // Otherwise, the player may get stuck on corners: http://www.iforce2d.net/b2dtut/ghost-vertices
+        CircleShape shape = new CircleShape();
+        float radius = (sprite.getWidth() / 2f) / MazeMap.TILE_SIZE * 0.6f; // Adjust radius for proper sizing
+        shape.setRadius(radius);
 
         FixtureDef fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
         fixtureDef.density = 1.0f;
-        fixtureDef.friction = 0.1f;
+        fixtureDef.friction = 0.0f;
 
         fixtureDef.filter.categoryBits = 0x0001; // Player category
         fixtureDef.filter.maskBits = 0x0002;    // Collision with walls
@@ -91,6 +90,7 @@ public class Player {
 
         body.setUserData("Player");
         body.setFixedRotation(true);
+
         shape.dispose();
         Gdx.app.postRunnable(() -> fixture.setSensor(false));
 
