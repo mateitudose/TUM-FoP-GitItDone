@@ -10,8 +10,8 @@ public abstract class GameEntity extends GameObject {
     protected Vector2 position;
     protected TextureRegion texture;
 
-    public GameEntity(int x, int y, int tileSize, TextureRegion texture) {
-        super(x, y, tileSize, texture);
+    public GameEntity(int x, int y, int entitySizeWidth, int entitySizeHeight, TextureRegion texture) {
+        super(x, y, entitySizeWidth, entitySizeHeight, texture);
         this.position = new Vector2(x, y);
         this.texture = texture;
     }

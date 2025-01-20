@@ -7,7 +7,7 @@ import de.tum.cit.fop.maze.entities.Player;
 
 public class ExitPoint extends GameObject {
     public ExitPoint(int x, int y, int tileSize, TextureRegion texture) {
-        super(x, y, tileSize, texture);
+        super(x, y, tileSize, tileSize, texture);
     }
 
     public boolean checkIfPlayerReachedExit(Player player, MazeRunnerGame game) {

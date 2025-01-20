@@ -10,29 +10,31 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 public abstract class GameObject {
     protected static final int TILE_SIZE = 16; // Tile size constant
     protected int x, y; // Position in tile coordinates
-    protected int objectSize; // Size of the tile
+    protected int objectSizeWidth, objectSizeHeight; // Size of the tile
     protected TextureRegion texture;
+    protected Sprite sprite;
 
-    public GameObject(int x, int y, int objectSize, TextureRegion texture) {
+    public GameObject(int x, int y, int objectSizeWidth, int objectSizeHeight, TextureRegion texture) {
         this.x = x;
         this.y = y;
-        this.objectSize = objectSize;
+        this.objectSizeWidth = objectSizeWidth;
+        this.objectSizeHeight = objectSizeHeight;
         this.texture = texture;
+        this.sprite = new Sprite(texture);
+        this.sprite.setSize(objectSizeWidth, objectSizeHeight);
+        this.sprite.setPosition(x * TILE_SIZE, y * TILE_SIZE);
     }
 
     public void render(SpriteBatch batch) {
-        Sprite objectSprite = new Sprite(texture);
-        objectSprite.setSize(objectSize, objectSize);
-        objectSprite.setPosition(x * TILE_SIZE, y * TILE_SIZE);
-        if (this instanceof Fish) {
-            // Fish is 10x10 pixels, so we need to adjust the position by (16-10)/2 = 3
-            objectSprite.setPosition(x * TILE_SIZE + 3, y * TILE_SIZE + 3);
-        }
-        objectSprite.draw(batch);
+        sprite.draw(batch);
     }
 
-    public int getObjectSize() {
-        return objectSize;
+    public int getObjectSizeWidth() {
+        return objectSizeWidth;
+    }
+
+    public int getObjectSizeHeight() {
+        return objectSizeHeight;
     }
 
     public TextureRegion getTexture() {

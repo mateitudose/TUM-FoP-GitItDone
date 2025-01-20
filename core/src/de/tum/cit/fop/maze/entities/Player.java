@@ -4,12 +4,10 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.*;
-
 import com.badlogic.gdx.utils.Array;
 import de.tum.cit.fop.maze.MazeMap;
 
@@ -17,7 +15,6 @@ public class Player extends GameEntity {
     private static final float MOVE_SPEED = 2.0f;
     private float speed;
     private World world;
-    private final Sprite sprite;
     private Animation<TextureRegion> downAnim, upAnim, rightAnim, leftAnim;
     private MazeMap mazeMap;
     private float stateTime = 0f;
@@ -25,20 +22,12 @@ public class Player extends GameEntity {
     private boolean isMoving = false;
 
     public Player(World world, MazeMap mazeMap, Vector2 startPosition) {
-        super((int) startPosition.x, (int) startPosition.y, MazeMap.TILE_SIZE, null);
+        super((int) startPosition.x, (int) startPosition.y, 22, 22, new TextureRegion(new Texture(Gdx.files.internal("cat.png")), 0, 32, 32, 32));
         this.world = world;
         this.mazeMap = mazeMap;
-        this.sprite = loadCharacter();
         loadAnimations();
         this.body = createBody(startPosition);
         this.speed = MOVE_SPEED;
-    }
-
-    private Sprite loadCharacter() {
-        Texture characterSheet = new Texture(Gdx.files.internal("cat.png"));
-        Sprite sprite = new Sprite(new TextureRegion(characterSheet, 0, 32, 32, 32));
-        sprite.setSize(22, 22);
-        return sprite;
     }
 
     private void loadAnimations() {

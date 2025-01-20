@@ -7,6 +7,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
  */
 public class Path extends GameObject {
     public Path(int x, int y, int tileSize, TextureRegion texture) {
-        super(x, y, tileSize, texture);
+        super(x, y, tileSize, tileSize, texture);
     }
 }

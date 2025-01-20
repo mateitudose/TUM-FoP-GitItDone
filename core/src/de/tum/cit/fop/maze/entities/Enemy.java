@@ -5,12 +5,12 @@ import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.math.Vector2;
 
 /**
- * Represents an enemy in the maze.
+ * TODO: Represents an enemy in the maze.
  */
 public class Enemy extends GameEntity {
 
     public Enemy(int x, int y, int tileSize, TextureRegion texture) {
-        super(x, y, tileSize, texture);
+        super(x, y, tileSize, tileSize, texture);
         this.position = new Vector2(x, y);
     }
 

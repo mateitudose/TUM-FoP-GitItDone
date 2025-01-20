@@ -10,8 +10,8 @@ import de.tum.cit.fop.maze.MazeMap;
 public class Wall extends GameObject {
     private World world;
 
-    public Wall(int x, int y, int size, TextureRegion texture, World world) {
-        super(x, y, size, texture);
+    public Wall(int x, int y, int tileSize, TextureRegion texture, World world) {
+        super(x, y, tileSize, tileSize, texture);
         this.world = world;
 
         // Create a Box2D body for collision
@@ -29,8 +29,8 @@ public class Wall extends GameObject {
 
         // Wall size in Box2D world units
         // Shrink the collision box size for the wall
-        float collisionWidth = (size / 2f) / MazeMap.TILE_SIZE;
-        float collisionHeight = (size / 2f) / MazeMap.TILE_SIZE;
+        float collisionWidth = (tileSize / 2f) / MazeMap.TILE_SIZE;
+        float collisionHeight = (tileSize / 2f) / MazeMap.TILE_SIZE;
 
         shape.setAsBox(collisionWidth, collisionHeight);
 

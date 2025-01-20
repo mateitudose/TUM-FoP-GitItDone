@@ -111,7 +111,7 @@ public class MazeMap {
                                 }
                                 case 3 -> {
                                     addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
-                                    addGameObject(key, new Trap(x, y, TILE_SIZE, trapTexture));
+                                    addGameObject(key, new LaserTrap(x, y));
                                 }
                                 case 4 -> {
                                     addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
