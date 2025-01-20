@@ -22,7 +22,7 @@ public class Player extends GameEntity {
     private boolean isMoving = false;
 
     public Player(World world, MazeMap mazeMap, Vector2 startPosition) {
-        super((int) startPosition.x, (int) startPosition.y, 22, 22, new TextureRegion(new Texture(Gdx.files.internal("cat.png")), 0, 32, 32, 32));
+        super((int) startPosition.x, (int) startPosition.y, 20, 20, new TextureRegion(new Texture(Gdx.files.internal("cat.png")), 0, 32, 32, 32));
         this.world = world;
         this.mazeMap = mazeMap;
         loadAnimations();
