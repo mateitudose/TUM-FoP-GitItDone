@@ -2,6 +2,7 @@ package de.tum.cit.fop.maze.screens;
 
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -37,7 +38,7 @@ public class PauseMenuScreen implements Screen {
         table.add(resumeButton).width(300).padBottom(20).row();
 
         // Go to Map Selection Button
-        TextButton mapSelectionButton = new TextButton("Choose a New Map", game.getSkin());
+        TextButton mapSelectionButton = new TextButton("Select New Map", game.getSkin());
         table.add(mapSelectionButton).width(300).padBottom(20).row();
 
         // Exit Button
@@ -48,13 +49,16 @@ public class PauseMenuScreen implements Screen {
         resumeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                // Dispose the pause menu screen and resume the previous screen
                 game.setScreen(previousScreen);
+                dispose();
             }
         });
         mapSelectionButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 game.goToMapSelection();
+                previousScreen.dispose();
             }
         });
         exitButton.addListener(new ChangeListener() {
@@ -85,10 +89,14 @@ public class PauseMenuScreen implements Screen {
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
+        // Pause the previous screen
+        previousScreen.pause();
     }
 
     @Override
     public void hide() {
+        // Resume the previous screen when the pause menu is closed
+        previousScreen.resume();
     }
 
     @Override

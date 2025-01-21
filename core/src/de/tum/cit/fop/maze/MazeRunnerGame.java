@@ -5,10 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
-import de.tum.cit.fop.maze.screens.GameScreen;
-import de.tum.cit.fop.maze.screens.MapSelectionScreen;
-import de.tum.cit.fop.maze.screens.MenuScreen;
-import de.tum.cit.fop.maze.screens.VictoryScreen;
+import de.tum.cit.fop.maze.screens.*;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
 /**
@@ -20,6 +17,9 @@ public class MazeRunnerGame extends Game {
     private MenuScreen menuScreen;
     private MapSelectionScreen mapSelectionScreen;
     private GameScreen gameScreen;
+    private GameOverScreen gameOverScreen;
+    private VictoryScreen victoryScreen;
+    private PauseMenuScreen pauseMenuScreen;
 
     // Sprite Batch for rendering
     private SpriteBatch spriteBatch;
@@ -41,8 +41,8 @@ public class MazeRunnerGame extends Game {
      */
     @Override
     public void create() {
-        spriteBatch = new SpriteBatch(); // Create SpriteBatch
-        skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
+        spriteBatch = new SpriteBatch();
+        skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json"));
 
         // Play some background music
         Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("menuMusic.mp3"));
@@ -51,9 +51,6 @@ public class MazeRunnerGame extends Game {
         goToMenu();
     }
 
-    /**
-     * Switches to the menu screen.
-     */
     public void goToMenu() {
         if (screen != null) {
             screen.dispose();
@@ -68,35 +65,44 @@ public class MazeRunnerGame extends Game {
         this.setScreen(new MapSelectionScreen(this));
     }
 
-    /**
-     * Switches to the game screen.
-     */
     public void goToGame(String mapPath) {
         if (screen != null) {
             screen.dispose();
         }
-        this.setScreen(new GameScreen(this, mapPath)); // Set the current screen to GameScreen
+        // Set the current screen to GameScreen and selected map path
+        this.setScreen(new GameScreen(this, mapPath));
     }
 
-    /**
-     * Cleans up resources when the game is disposed.
-     */
+    public void goToGameOver(String mapPath) {
+        if (screen != null) {
+            screen.dispose();
+        }
+        this.setScreen(new GameOverScreen(this, mapPath));
+    }
+
+    public void goToPauseMenu(GameScreen gameScreen) {
+        // Don't dispose the game screen here, as we want to resume the game after the pause menu is closed
+        this.setScreen(new PauseMenuScreen(this, gameScreen));
+    }
+
+    public void goToVictory() {
+        if (screen != null) {
+            screen.dispose();
+        }
+        this.setScreen(new VictoryScreen(this));
+    }
+
     @Override
     public void dispose() {
         menuScreen.dispose();
         mapSelectionScreen.dispose();
         gameScreen.dispose();
-        getScreen().hide(); // Hide the current screen
-        getScreen().dispose(); // Dispose the current screen
-        spriteBatch.dispose(); // Dispose the spriteBatch
-        skin.dispose(); // Dispose the skin
+        getScreen().hide();
+        getScreen().dispose();
+        spriteBatch.dispose();
+        skin.dispose();
     }
 
-    public void goToVictory() {
-        this.setScreen(new VictoryScreen(this));
-    }
-
-    // Getter methods
     public Skin getSkin() {
         return skin;
     }

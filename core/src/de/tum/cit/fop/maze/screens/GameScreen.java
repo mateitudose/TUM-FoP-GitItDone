@@ -38,13 +38,14 @@ public class GameScreen implements Screen {
     private String mapPath;
 
     private RayHandler rayHandler;
-
-    private long resizeEndTime = 0;
-
     private Box2DDebugRenderer debugRenderer;
+
+    private int lastWidth = -1;
+    private int lastHeight = -1;
 
     public GameScreen(MazeRunnerGame game, String mapPath) {
         this.game = game;
+        this.mapPath = mapPath;
 
         // Initialize RayHandler
         RayHandler.useDiffuseLight(true);
@@ -52,14 +53,17 @@ public class GameScreen implements Screen {
         // Set ambient light to brighten the world
         rayHandler.setAmbientLight(1f, 1f, 1f, 1.0f); // Soft white ambient light
 
-        this.mapPath = mapPath;
-
         // Debug the collision boxes (comment when not testing)
         debugRenderer = new Box2DDebugRenderer();
     }
 
     @Override
     public void show() {
+        // If the world has already been initialized, keep it, as it means the game was resumed
+        if (gameWorld != null) {
+            return;
+        }
+
         Box2D.init();
         gameWorld = new World(new Vector2(0, 0), true);
 
@@ -80,6 +84,7 @@ public class GameScreen implements Screen {
             public void postSolve(Contact contact, ContactImpulse impulse) {
             }
         });
+
         // Load the maze
         int windowWidth = Gdx.graphics.getWidth();
         int windowHeight = Gdx.graphics.getHeight();
@@ -106,7 +111,6 @@ public class GameScreen implements Screen {
 
         Vector2 playerPosition = player.getBody().getPosition();
         camera.position.set(playerPosition.x * MazeMap.TILE_SIZE, playerPosition.y * MazeMap.TILE_SIZE, 0);
-
         camera.update();
     }
 
@@ -117,23 +121,17 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
-        // Handle game pause when Esc is pressed
 
+        // Handle game pause when Esc is pressed
         if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE)) {
-            game.setScreen(new PauseMenuScreen(game, this)); // Transition to the pause menu
-            return; // Stop rendering the game screen
+            game.goToPauseMenu(this);
+            return;
         }
 
         // Update player
         player.update(delta);
 
         checkGameStatus();
-
-        // Check if resizing is complete
-        if (resizeEndTime > 0 && System.currentTimeMillis() > resizeEndTime) {
-            recenterCameraOnPlayer();
-            resizeEndTime = 0;
-        }
 
         // Update the camera position
         updateCamera();
@@ -167,7 +165,7 @@ public class GameScreen implements Screen {
     private void updateCamera() {
         Vector2 playerPosition = player.getBody().getPosition();
         // Smooth interpolation
-        float lerpFactor = 0.3f;
+        float lerpFactor = 0.2f;
         camera.position.lerp(new Vector3(playerPosition.x * MazeMap.TILE_SIZE, playerPosition.y * MazeMap.TILE_SIZE, 0), lerpFactor);
 
         if (Gdx.input.isKeyPressed(Input.Keys.MINUS)) {
@@ -180,24 +178,35 @@ public class GameScreen implements Screen {
         camera.update();
     }
 
-    private void recenterCameraOnPlayer() {
-        Vector2 playerPosition = player.getBody().getPosition();
-        camera.position.set(playerPosition.x, playerPosition.y, 0);
-        camera.update();
+    private void checkGameStatus() {
+        for (ExitPoint exitPoint : mazeMap.getExitPoints()) {
+            if (exitPoint.checkIfPlayerReachedExit(player, game)) {
+                return;
+            }
+        }
     }
 
+    // Apparently, after unpausing game, libGDX does call resize() method, so we (actually) need to update the viewport ONLY if the dimensions change
+    // Wasted 3 hours on this thing :(
     @Override
     public void resize(int width, int height) {
-        viewport.update(width, height, true);
-        camera.update();
+        if (width != lastWidth || height != lastHeight) {
+            lastWidth = width;
+            lastHeight = height;
+            // Only update if dimensions change
+            viewport.update(width, height, true);
+            camera.update();
+        }
     }
 
     @Override
     public void pause() {
+        gameWorld.setAutoClearForces(false);
     }
 
     @Override
     public void resume() {
+        gameWorld.setAutoClearForces(true);
     }
 
     @Override
@@ -210,14 +219,6 @@ public class GameScreen implements Screen {
         gameWorld.dispose();
         rayHandler.dispose();
         debugRenderer.dispose();
-    }
-
-    private void checkGameStatus() {
-        for (ExitPoint exitPoint : mazeMap.getExitPoints()) {
-            if (exitPoint.checkIfPlayerReachedExit(player, game)) {
-                return;
-            }
-        }
     }
 
 }
