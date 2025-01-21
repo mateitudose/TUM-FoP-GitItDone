@@ -9,16 +9,13 @@ import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.*;
-import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import box2dLight.RayHandler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeMap;
 import de.tum.cit.fop.maze.MazeRunnerGame;
-import de.tum.cit.fop.maze.PauseMenuScreen;
 import de.tum.cit.fop.maze.entities.Player;
-import de.tum.cit.fop.maze.objects.EntryPoint;
 import de.tum.cit.fop.maze.objects.ExitPoint;
 import de.tum.cit.fop.maze.objects.GameObject;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
@@ -114,25 +111,8 @@ public class GameScreen implements Screen {
     }
 
     private Vector2 findEntryPoint() {
-        for (List<GameObject> objects : mazeMap.getGameObjects().values()) {
-            for (GameObject object : objects) {
-                if (object instanceof EntryPoint) {
-                    int entryX = object.getX();
-                    int entryY = object.getY();
-
-                    // Check if the entry position overlaps a wall
-                    if (mazeMap.isWall(entryX, entryY)) {
-                        throw new IllegalStateException("Entry point overlaps a wall at: " + entryX + ", " + entryY);
-                    }
-
-                    return new Vector2(entryX, entryY);
-                }
-            }
-        }
-        throw new IllegalStateException("No EntryPoint found in the maze!");
+        return new Vector2(mazeMap.entryX, mazeMap.entryY);
     }
-
-
 
     @Override
     public void render(float delta) {

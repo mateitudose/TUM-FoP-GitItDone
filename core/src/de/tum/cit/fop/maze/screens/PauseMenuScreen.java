@@ -1,4 +1,4 @@
-package de.tum.cit.fop.maze;
+package de.tum.cit.fop.maze.screens;
 
 
 import com.badlogic.gdx.Gdx;
@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import de.tum.cit.fop.maze.MazeRunnerGame;
 
 public class PauseMenuScreen implements Screen {
 
@@ -30,7 +31,7 @@ public class PauseMenuScreen implements Screen {
 
         // Pause menu UI
         table.add(new Label("Paused", game.getSkin(), "title")).padBottom(50).row();
-        //3 buttons onn the pause menu screen :
+        // 3 buttons onn the pause menu screen:
         // Resume Button
         TextButton resumeButton = new TextButton("Resume", game.getSkin());
         table.add(resumeButton).width(300).padBottom(20).row();
@@ -50,14 +51,12 @@ public class PauseMenuScreen implements Screen {
                 game.setScreen(previousScreen);
             }
         });
-
         mapSelectionButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 game.goToMapSelection();
             }
         });
-
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {

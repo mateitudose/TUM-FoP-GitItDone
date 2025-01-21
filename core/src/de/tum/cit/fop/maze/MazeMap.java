@@ -129,8 +129,6 @@ public class MazeMap {
                 }
             }
 
-            if (!hasEntry) addEntryPoint();
-            if (!hasExit) addExitPoint();
             if (!hasEntry) throw new IllegalStateException("No entry point defined in the maze file!");
             if (!hasExit) throw new IllegalStateException("No exit point defined in the maze file!");
 
@@ -238,42 +236,6 @@ public class MazeMap {
             case CORNER_LD -> cornerLDTexture;
             case CORNER_RD -> cornerRDTexture;
         };
-    }
-
-    // TODO: This should be deleted in further commits
-    private void addEntryPoint() {
-        for (int x = 1; x < mazeWidth - 1; x++) {
-            String key = x + ",0";
-            if (gameObjects.get(key) instanceof Wall) {
-                String belowKey = x + ",1";
-                if (!(gameObjects.get(belowKey) instanceof Wall)) {
-                    addGameObject(key, new EntryPoint(x, 0, TILE_SIZE, entryTexture));
-                    entryX = x;
-                    entryY = 0;
-                    System.out.println("Added Entry Point at: " + key);
-                    return;
-                }
-            }
-        }
-        System.out.println("No suitable position found for Entry Point!");
-    }
-
-    // TODO: This should be deleted in further commits
-    private void addExitPoint() {
-        for (int x = 1; x < mazeWidth - 1; x++) {
-            String key = x + "," + (mazeHeight - 1);
-            if (gameObjects.get(key) instanceof Wall) {
-                String aboveKey = x + "," + (mazeHeight - 2);
-                if (!(gameObjects.get(aboveKey) instanceof Wall)) {
-                    ExitPoint exitPoint = new ExitPoint(x, mazeHeight - 1, TILE_SIZE, exitTexture);
-                    addGameObject(key, exitPoint);
-                    exitPoints.add(exitPoint);
-                    System.out.println("Added Exit Point at: " + key);
-                    return;
-                }
-            }
-        }
-        System.out.println("No suitable position found for Exit Point!");
     }
 
     private boolean isCorner(int x, int y) {
