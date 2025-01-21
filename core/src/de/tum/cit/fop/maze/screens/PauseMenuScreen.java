@@ -74,6 +74,12 @@ public class PauseMenuScreen implements Screen {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         stage.act(delta);
         stage.draw();
+
+        // Unpause the game when the escape key is pressed
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            game.setScreen(previousScreen);
+            dispose();
+        }
     }
 
     @Override
