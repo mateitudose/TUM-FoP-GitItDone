@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeMap;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.PauseMenuScreen;
 import de.tum.cit.fop.maze.entities.Player;
 import de.tum.cit.fop.maze.objects.EntryPoint;
 import de.tum.cit.fop.maze.objects.ExitPoint;
@@ -136,6 +137,12 @@ public class GameScreen implements Screen {
     @Override
     public void render(float delta) {
         ScreenUtils.clear(0, 0, 0, 1);
+        // Handle game pause when Esc is pressed
+
+        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE)) {
+            game.setScreen(new PauseMenuScreen(game, this)); // Transition to the pause menu
+            return; // Stop rendering the game screen
+        }
 
         // Update player
         player.update(delta);
