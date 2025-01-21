@@ -45,8 +45,7 @@ public class MazeRunnerGame extends Game {
         skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json")); // Load UI skin
 
         // Play some background music
-        // Background sound
-        Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("menuMusic.mp3.mp3"));
+        Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("menuMusic.mp3"));
         backgroundMusic.setLooping(true);
         backgroundMusic.play();
         goToMenu();
