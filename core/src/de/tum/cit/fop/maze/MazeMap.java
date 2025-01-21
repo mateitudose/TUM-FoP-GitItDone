@@ -15,6 +15,7 @@ public class MazeMap {
     private final TextureRegion tree1Texture, tree2Texture, entryTexture, exitTexture, trapTexture, enemyTexture, keyTexture, pathTexture, grassTexture, wallHorTexture, wallVerTexture, cornerRUTexture, cornerRDTexture, cornerLUTexture, cornerLDTexture;
     private final Map<String, List<GameObject>> gameObjects = new HashMap<>();
     private final List<ExitPoint> exitPoints = new ArrayList<>();
+    private final List<LaserTrap> laserTraps = new ArrayList<>();
     private int mazeWidth, mazeHeight;
     private String mapPath;
     private final World world;
@@ -110,8 +111,10 @@ public class MazeMap {
                                     }
                                 }
                                 case 3 -> {
+                                    LaserTrap laserTrap = new LaserTrap(x, y);
                                     addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
-                                    addGameObject(key, new LaserTrap(x, y));
+                                    addGameObject(key, laserTrap);
+                                    laserTraps.add(laserTrap);
                                 }
                                 case 4 -> {
                                     addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
@@ -279,5 +282,9 @@ public class MazeMap {
 
     public List<ExitPoint> getExitPoints() {
         return exitPoints;
+    }
+
+    public List<LaserTrap> getLaserTraps() {
+        return laserTraps;
     }
 }

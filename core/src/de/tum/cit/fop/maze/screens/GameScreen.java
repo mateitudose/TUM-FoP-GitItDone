@@ -19,6 +19,7 @@ import de.tum.cit.fop.maze.entities.Player;
 import de.tum.cit.fop.maze.objects.ExitPoint;
 import de.tum.cit.fop.maze.objects.GameObject;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import de.tum.cit.fop.maze.objects.LaserTrap;
 
 import java.util.List;
 
@@ -42,6 +43,7 @@ public class GameScreen implements Screen {
 
     private int lastWidth = -1;
     private int lastHeight = -1;
+    private boolean isPaused = false;
 
     public GameScreen(MazeRunnerGame game, String mapPath) {
         this.game = game;
@@ -50,16 +52,13 @@ public class GameScreen implements Screen {
         // Initialize RayHandler
         RayHandler.useDiffuseLight(true);
         rayHandler = new RayHandler(gameWorld);
-        // Set ambient light to brighten the world
         rayHandler.setAmbientLight(1f, 1f, 1f, 1.0f); // Soft white ambient light
 
-        // Debug the collision boxes (comment when not testing)
         debugRenderer = new Box2DDebugRenderer();
     }
 
     @Override
     public void show() {
-        // If the world has already been initialized, keep it, as it means the game was resumed
         if (gameWorld != null) {
             return;
         }
@@ -69,20 +68,16 @@ public class GameScreen implements Screen {
 
         gameWorld.setContactListener(new ContactListener() {
             @Override
-            public void beginContact(Contact contact) {
-            }
+            public void beginContact(Contact contact) {}
 
             @Override
-            public void endContact(Contact contact) {
-            }
+            public void endContact(Contact contact) {}
 
             @Override
-            public void preSolve(Contact contact, Manifold oldManifold) {
-            }
+            public void preSolve(Contact contact, Manifold oldManifold) {}
 
             @Override
-            public void postSolve(Contact contact, ContactImpulse impulse) {
-            }
+            public void postSolve(Contact contact, ContactImpulse impulse) {}
         });
 
         // Load the maze
@@ -105,8 +100,8 @@ public class GameScreen implements Screen {
 
         // Initialize the player
         Vector2 entryPosition = findEntryPoint();
-        float entryX = (entryPosition.x + 0.5f) * MazeMap.TILE_SIZE / 16f; // Add 0.5f to center
-        float entryY = (entryPosition.y + 0.5f) * MazeMap.TILE_SIZE / 16f; // Add 0.5f to center
+        float entryX = (entryPosition.x + 0.5f) * MazeMap.TILE_SIZE / 16f;
+        float entryY = (entryPosition.y + 0.5f) * MazeMap.TILE_SIZE / 16f;
         player = new Player(gameWorld, mazeMap, new Vector2(entryX, entryY));
 
         Vector2 playerPosition = player.getBody().getPosition();
@@ -123,7 +118,8 @@ public class GameScreen implements Screen {
         ScreenUtils.clear(0, 0, 0, 1);
 
         // Handle game pause when Esc is pressed
-        if (Gdx.input.isKeyJustPressed(com.badlogic.gdx.Input.Keys.ESCAPE)) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            delta = 0; // Prevent updating game logic when paused
             game.goToPauseMenu(this);
             return;
         }
@@ -131,14 +127,15 @@ public class GameScreen implements Screen {
         // Update player
         player.update(delta);
 
-        checkGameStatus();
+        // Update the animations of the laser traps
+        for (LaserTrap laserTrap : mazeMap.getLaserTraps()) {
+            laserTrap.update(delta);
+        }
 
-        // Update the camera position
+        checkGameStatus();
         updateCamera();
 
-        // Render the maze
         batch.setProjectionMatrix(camera.combined);
-
         batch.begin();
         for (List<GameObject> objectList : mazeMap.getGameObjects().values()) {
             for (GameObject object : objectList) {
@@ -149,10 +146,10 @@ public class GameScreen implements Screen {
         player.render(batch);
         batch.end();
 
-        // Render lights
         rayHandler.setCombinedMatrix(camera);
         rayHandler.updateAndRender();
 
+        // Debug rendering of all colliders
         Matrix4 scaledMatrix = new Matrix4(camera.combined);
         scaledMatrix.scale(16f, 16f, 16f);
 
@@ -186,6 +183,18 @@ public class GameScreen implements Screen {
         }
     }
 
+    private void togglePause() {
+        isPaused = !isPaused;
+
+        for (LaserTrap laserTrap : mazeMap.getLaserTraps()) {
+            if (isPaused) {
+                laserTrap.pauseTimer();
+            } else {
+                laserTrap.resumeTimer();
+            }
+        }
+    }
+
     // Apparently, after unpausing game, libGDX does call resize() method, so we (actually) need to update the viewport ONLY if the dimensions change
     // Wasted 3 hours on this thing :(
     @Override
@@ -201,17 +210,16 @@ public class GameScreen implements Screen {
 
     @Override
     public void pause() {
-        gameWorld.setAutoClearForces(false);
+        togglePause();
     }
 
     @Override
     public void resume() {
-        gameWorld.setAutoClearForces(true);
+        togglePause();
     }
 
     @Override
-    public void hide() {
-    }
+    public void hide() {}
 
     @Override
     public void dispose() {
@@ -220,5 +228,4 @@ public class GameScreen implements Screen {
         rayHandler.dispose();
         debugRenderer.dispose();
     }
-
 }

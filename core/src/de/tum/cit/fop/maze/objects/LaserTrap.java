@@ -6,9 +6,6 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 public class LaserTrap extends GameObject {
     private static final float ANIMATION_SPEED = 0.1f;
     private static final int ACTIVATING_FRAMES = 3;
@@ -24,14 +21,20 @@ public class LaserTrap extends GameObject {
     private boolean isActivating = false;
     private boolean isDeactivating = false;
 
-    private Timer timer;
+    private long activeDuration = 5000; // Active time in milliseconds
+    private long inactiveDuration = 3000; // Inactive time in milliseconds
+
+    private long elapsedTimeActive = 0;
+    private long elapsedTimeInactive = 0;
+    private long lastUpdateTime = 0;
+
+    private boolean isPaused = false;
 
     public LaserTrap(int x, int y) {
         super(x, y, 8, 16, new TextureRegion(new Texture("editedLaser.png"), 32, 0, 32, 64));
         sprite.setPosition(x * TILE_SIZE + 3, y * TILE_SIZE);
         loadAnimations();
         stateTime = 0f;
-        timer = new Timer();
         activate();
     }
 
@@ -61,19 +64,41 @@ public class LaserTrap extends GameObject {
     }
 
     public void update(float deltaTime) {
-        stateTime += deltaTime;
+        if (isPaused) {
+            lastUpdateTime = System.currentTimeMillis();
+            return;
+        }
+
+        if (deltaTime > 0) {
+            stateTime += deltaTime;
+        }
+
+        long currentTime = System.currentTimeMillis();
+        long elapsed = currentTime - lastUpdateTime;
+        lastUpdateTime = currentTime;
+
+        if (isActive) {
+            elapsedTimeActive += elapsed;
+            if (elapsedTimeActive >= activeDuration) {
+                deactivate();
+            }
+        } else {
+            elapsedTimeInactive += elapsed;
+            if (elapsedTimeInactive >= inactiveDuration) {
+                activate();
+            }
+        }
     }
 
     @Override
     public void render(SpriteBatch batch) {
-        update(Gdx.graphics.getDeltaTime());
-
         if (isActivating) {
             sprite.setRegion(activatingAnimation.getKeyFrame(stateTime, false));
             if (activatingAnimation.isAnimationFinished(stateTime)) {
                 isActivating = false;
                 isActive = true;
                 stateTime = 0;
+                elapsedTimeActive = 0;
             }
         } else if (isActive) {
             sprite.setRegion(activeAnimation.getKeyFrame(stateTime, true));
@@ -82,6 +107,7 @@ public class LaserTrap extends GameObject {
             if (deactivatingAnimation.isAnimationFinished(stateTime)) {
                 isDeactivating = false;
                 stateTime = 0;
+                elapsedTimeInactive = 0;
             }
         } else {
             sprite.setRegion(activatingAnimation.getKeyFrame(0, true));
@@ -95,14 +121,8 @@ public class LaserTrap extends GameObject {
         isDeactivating = false;
         isActive = false;
         stateTime = 0;
-
-        // Schedule deactivation after 5 seconds
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                deactivate();
-            }
-        }, 5000);
+        elapsedTimeInactive = 0;
+        lastUpdateTime = System.currentTimeMillis();
     }
 
     public void deactivate() {
@@ -110,6 +130,19 @@ public class LaserTrap extends GameObject {
         isActivating = false;
         isActive = false;
         stateTime = 0;
+        elapsedTimeActive = 0;
+        lastUpdateTime = System.currentTimeMillis();
+    }
+
+    public void pauseTimer() {
+        isPaused = true;
+    }
+
+    public void resumeTimer() {
+        if (isPaused) {
+            isPaused = false;
+            lastUpdateTime = System.currentTimeMillis();
+        }
     }
 
     public boolean isActive() {
