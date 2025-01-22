@@ -13,6 +13,7 @@ import de.tum.cit.fop.maze.MazeMap;
 
 public class Player extends GameEntity {
     private static final float MOVE_SPEED = 2.0f;
+    private static final int PLAYER_LIVES = 3;
     private float speed;
     private World world;
     private Animation<TextureRegion> downAnim, upAnim, rightAnim, leftAnim;
@@ -20,6 +21,7 @@ public class Player extends GameEntity {
     private float stateTime = 0f;
     private String currentDirection = "down";
     private boolean isMoving = false;
+    private int lives;
 
     public Player(World world, MazeMap mazeMap, Vector2 startPosition) {
         super((int) startPosition.x, (int) startPosition.y, 20, 20, new TextureRegion(new Texture(Gdx.files.internal("cat.png")), 0, 32, 32, 32));
@@ -28,6 +30,7 @@ public class Player extends GameEntity {
         loadAnimations();
         this.body = createBody(startPosition);
         this.speed = MOVE_SPEED;
+        this.lives = PLAYER_LIVES;
     }
 
     private void loadAnimations() {
@@ -148,5 +151,21 @@ public class Player extends GameEntity {
 
         sprite.setPosition(spriteX, spriteY);
         sprite.draw(batch);
+    }
+
+    public void loseLives(int lives) {
+        this.lives -= lives;
+    }
+
+    public void addLives(int lives) {
+        this.lives += lives;
+    }
+
+    public int getLives() {
+        return lives;
+    }
+
+    public boolean isAlive() {
+        return lives > 0;
     }
 }
