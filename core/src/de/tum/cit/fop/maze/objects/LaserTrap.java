@@ -21,6 +21,7 @@ public class LaserTrap extends GameObject {
     private boolean isActivating = false;
     private boolean isDeactivating = false;
     private boolean wasDangerous = false;
+    private boolean previousDangerous = false;
 
     private long activeDuration = 5000; // Active time in milliseconds
     private long inactiveDuration = 3000; // Inactive time in milliseconds
@@ -70,6 +71,9 @@ public class LaserTrap extends GameObject {
             return;
         }
 
+        // Save the previous danger state before processing updates
+        previousDangerous = isDangerous();
+
         stateTime += deltaTime;
         long currentTime = System.currentTimeMillis();
         long elapsed = currentTime - lastUpdateTime;
@@ -88,7 +92,7 @@ public class LaserTrap extends GameObject {
             }
         }
 
-        // Update danger state tracking
+        // Update danger state tracking for the next frame
         wasDangerous = isDangerous();
     }
 
@@ -156,6 +160,6 @@ public class LaserTrap extends GameObject {
     }
 
     public boolean becameDangerous() {
-        return isDangerous() && !wasDangerous;
+        return isDangerous() && !previousDangerous;
     }
 }
