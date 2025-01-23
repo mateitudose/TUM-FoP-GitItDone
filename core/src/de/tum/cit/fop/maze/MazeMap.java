@@ -143,7 +143,29 @@ public class MazeMap {
                                 }
                                 case 5 -> {
                                     addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
-                                    addGameObject(key, new Fish(x, y));
+                                    Fish fish = new Fish(x, y);
+
+                                    // Create physics body for the fish
+                                    BodyDef bodyDef = new BodyDef();
+                                    bodyDef.type = BodyDef.BodyType.StaticBody;
+                                    bodyDef.position.set(x + 0.5f, y + 0.5f); // Center in tile
+
+                                    Body body = world.createBody(bodyDef);
+                                    PolygonShape shape = new PolygonShape();
+                                    shape.setAsBox(0.25f, 0.25f); // Smaller hitbox
+
+                                    FixtureDef fixtureDef = new FixtureDef();
+                                    fixtureDef.shape = shape;
+                                    fixtureDef.isSensor = true; // No collision response
+                                    fixtureDef.filter.categoryBits = 0x0004; // Fish category
+                                    fixtureDef.filter.maskBits = 0x0001; // Collide with player
+
+                                    body.createFixture(fixtureDef);
+                                    body.setUserData(fish); // Link fish to body
+                                    fish.setBody(body); // Link body to fish
+
+                                    shape.dispose();
+                                    addGameObject(key, fish);
                                 }
                             }
                         }
@@ -299,6 +321,15 @@ public class MazeMap {
         String key = x + "," + y;
         List<GameObject> objects = gameObjects.get(key);
         return objects != null ? objects.stream().findFirst().orElse(null) : null;
+    }
+
+    public void removeGameObject(GameObject object) {
+        String key = object.getX() + "," + object.getY();
+        List<GameObject> objects = gameObjects.get(key);
+        if (objects != null) {
+            objects.remove(object);
+            if (objects.isEmpty()) gameObjects.remove(key);
+        }
     }
 
     public List<ExitPoint> getExitPoints() {

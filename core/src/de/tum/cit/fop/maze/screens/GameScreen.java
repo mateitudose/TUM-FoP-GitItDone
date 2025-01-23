@@ -17,6 +17,7 @@ import de.tum.cit.fop.maze.MazeMap;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entities.Player;
 import de.tum.cit.fop.maze.objects.ExitPoint;
+import de.tum.cit.fop.maze.objects.Fish;
 import de.tum.cit.fop.maze.objects.GameObject;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import de.tum.cit.fop.maze.objects.LaserTrap;
@@ -48,6 +49,7 @@ public class GameScreen implements Screen {
     private boolean isPaused = false;
 
     private Set<LaserTrap> activeContactTraps = new HashSet<>();
+    private final Set<Fish> fishToCollect = new HashSet<>();
 
     public GameScreen(MazeRunnerGame game, String mapPath) {
         this.game = game;
@@ -73,6 +75,7 @@ public class GameScreen implements Screen {
             @Override
             public void beginContact(Contact contact) {
                 handleTrapContact(contact, true);
+                handleFishContact(contact, true);
             }
 
             @Override
@@ -105,6 +108,26 @@ public class GameScreen implements Screen {
                         } else {
                             activeContactTraps.remove(trap);
                         }
+                    }
+                }
+            }
+
+            private void handleFishContact(Contact contact, boolean isBegin) {
+                Fixture fixtureA = contact.getFixtureA();
+                Fixture fixtureB = contact.getFixtureB();
+
+                Object userDataA = fixtureA.getBody().getUserData();
+                Object userDataB = fixtureB.getBody().getUserData();
+
+                // Debug logs to verify collision detection
+//                Gdx.app.log("Contact", "A: " + userDataA.getClass().getSimpleName() + ", B: " + userDataB.getClass().getSimpleName());
+
+                if ((userDataA instanceof Player && userDataB instanceof Fish) ||
+                        (userDataB instanceof Player && userDataA instanceof Fish)) {
+                    Fish fish = (userDataA instanceof Fish) ? (Fish) userDataA : (Fish) userDataB;
+                    if (isBegin) {
+//                        Gdx.app.log("FishContact", "Collected fish at (" + fish.getX() + ", " + fish.getY() + ")");
+                        fishToCollect.add(fish);
                     }
                 }
             }
@@ -165,9 +188,21 @@ public class GameScreen implements Screen {
         for (LaserTrap trap : activeContactTraps) {
             if (trap.becameDangerous()) {
                 player.loseLives(1);
-                System.out.println("Player damaged by activating laser! Lives remaining: " + player.getLives());
+//                System.out.println("Player damaged by activating laser! Lives remaining: " + player.getLives());
             }
         }
+
+        // Process collected fish
+        for (Fish fish : fishToCollect) {
+//            Gdx.app.log("FishRemoval", "Removing fish at (" + fish.getX() + ", " + fish.getY() + ")");
+            mazeMap.removeGameObject(fish);
+            if (fish.getBody() != null) {
+                gameWorld.destroyBody(fish.getBody());
+//                Gdx.app.log("FishRemoval", "Body destroyed successfully");
+            }
+            player.collectFish();
+        }
+        fishToCollect.clear();
 
         checkGameStatus();
         updateCamera();

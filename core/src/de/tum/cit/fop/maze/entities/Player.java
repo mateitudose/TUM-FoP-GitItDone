@@ -22,6 +22,7 @@ public class Player extends GameEntity {
     private String currentDirection = "down";
     private boolean isMoving = false;
     private int lives;
+    private int collectedFish = 0;
 
     public Player(World world, MazeMap mazeMap, Vector2 startPosition) {
         super((int) startPosition.x, (int) startPosition.y, 20, 20, new TextureRegion(new Texture(Gdx.files.internal("cat.png")), 0, 32, 32, 32));
@@ -70,12 +71,12 @@ public class Player extends GameEntity {
         fixtureDef.density = 1.0f;
         fixtureDef.friction = 0.0f;
         fixtureDef.filter.categoryBits = 0x0001;
-        fixtureDef.filter.maskBits = 0x0002;
+        fixtureDef.filter.maskBits = 0x0002 | 0x0004;
 
         Fixture fixture = body.createFixture(fixtureDef);
         fixture.setSensor(true);
 
-        body.setUserData("Player");
+        body.setUserData(this);
         body.setFixedRotation(true);
 
         shape.dispose();
@@ -167,5 +168,13 @@ public class Player extends GameEntity {
 
     public boolean isAlive() {
         return lives > 0;
+    }
+
+    public void collectFish() {
+        collectedFish++;
+    }
+
+    public int getCollectedFish() {
+        return collectedFish;
     }
 }
