@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.physics.box2d.*;
 import de.tum.cit.fop.maze.entities.Enemy;
 import de.tum.cit.fop.maze.objects.*;
 
@@ -112,6 +112,27 @@ public class MazeMap {
                                 }
                                 case 3 -> {
                                     LaserTrap laserTrap = new LaserTrap(x, y);
+
+                                    // Physics setup
+                                    BodyDef bodyDef = new BodyDef();
+                                    bodyDef.type = BodyDef.BodyType.StaticBody;
+                                    bodyDef.position.set(x + 0.5f, y + 0.5f);
+
+                                    Body body = world.createBody(bodyDef);
+
+                                    PolygonShape shape = new PolygonShape();
+                                    shape.setAsBox(0.3f, 0.3f);
+
+                                    FixtureDef fixtureDef = new FixtureDef();
+                                    fixtureDef.shape = shape;
+                                    fixtureDef.isSensor = true;
+                                    fixtureDef.filter.categoryBits = 0x0002; // Trap category
+                                    fixtureDef.filter.maskBits = 0x0001;     // Collide with player
+
+                                    body.createFixture(fixtureDef);
+                                    body.setUserData(laserTrap);
+                                    shape.dispose();
+
                                     addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
                                     addGameObject(key, laserTrap);
                                     laserTraps.add(laserTrap);

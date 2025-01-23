@@ -21,7 +21,9 @@ import de.tum.cit.fop.maze.objects.GameObject;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import de.tum.cit.fop.maze.objects.LaserTrap;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 
 public class GameScreen implements Screen {
@@ -45,15 +47,11 @@ public class GameScreen implements Screen {
     private int lastHeight = -1;
     private boolean isPaused = false;
 
+    private Set<LaserTrap> activeContactTraps = new HashSet<>();
+
     public GameScreen(MazeRunnerGame game, String mapPath) {
         this.game = game;
         this.mapPath = mapPath;
-
-        // Initialize RayHandler
-        RayHandler.useDiffuseLight(true);
-        rayHandler = new RayHandler(gameWorld);
-        rayHandler.setAmbientLight(1f, 1f, 1f, 1.0f); // Soft white ambient light
-
         debugRenderer = new Box2DDebugRenderer();
     }
 
@@ -63,21 +61,53 @@ public class GameScreen implements Screen {
             return;
         }
 
+        // Initialize RayHandler
+        RayHandler.useDiffuseLight(true);
+        rayHandler = new RayHandler(gameWorld);
+        rayHandler.setAmbientLight(1f, 1f, 1f, 1.0f); // Soft white ambient light
+
         Box2D.init();
         gameWorld = new World(new Vector2(0, 0), true);
 
         gameWorld.setContactListener(new ContactListener() {
             @Override
-            public void beginContact(Contact contact) {}
+            public void beginContact(Contact contact) {
+                handleTrapContact(contact, true);
+            }
 
             @Override
-            public void endContact(Contact contact) {}
+            public void endContact(Contact contact) {
+                handleTrapContact(contact, false);
+            }
 
             @Override
-            public void preSolve(Contact contact, Manifold oldManifold) {}
+            public void preSolve(Contact contact, Manifold manifold) {
+
+            }
 
             @Override
-            public void postSolve(Contact contact, ContactImpulse impulse) {}
+            public void postSolve(Contact contact, ContactImpulse contactImpulse) {
+
+            }
+
+            private void handleTrapContact(Contact contact, boolean isBegin) {
+                Fixture[] fixtures = {contact.getFixtureA(), contact.getFixtureB()};
+
+                for (Fixture fixture : fixtures) {
+                    Object userData = fixture.getBody().getUserData();
+                    if (userData instanceof LaserTrap trap) {
+                        if (isBegin) {
+                            activeContactTraps.add(trap);
+                            if (trap.isDangerous()) {
+                                player.loseLives(1);
+                                System.out.println("Player damaged by laser! Lives remaining: " + player.getLives());
+                            }
+                        } else {
+                            activeContactTraps.remove(trap);
+                        }
+                    }
+                }
+            }
         });
 
         // Load the maze
@@ -130,6 +160,13 @@ public class GameScreen implements Screen {
         // Update the animations of the laser traps
         for (LaserTrap laserTrap : mazeMap.getLaserTraps()) {
             laserTrap.update(delta);
+        }
+
+        for (LaserTrap trap : activeContactTraps) {
+            if (trap.becameDangerous()) {
+                player.loseLives(1);
+                System.out.println("Player damaged by activating laser! Lives remaining: " + player.getLives());
+            }
         }
 
         checkGameStatus();
@@ -220,7 +257,8 @@ public class GameScreen implements Screen {
     }
 
     @Override
-    public void hide() {}
+    public void hide() {
+    }
 
     // TODO: Dispose of all resources
     @Override
