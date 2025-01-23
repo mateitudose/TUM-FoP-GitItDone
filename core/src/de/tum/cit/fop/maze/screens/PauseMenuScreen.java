@@ -1,6 +1,5 @@
 package de.tum.cit.fop.maze.screens;
 
-
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
@@ -18,9 +17,9 @@ public class PauseMenuScreen implements Screen {
 
     private final Stage stage;
     private final MazeRunnerGame game;
-    private final Screen previousScreen;
+    private final GameScreen previousScreen; // Changed to GameScreen for proper handling
 
-    public PauseMenuScreen(MazeRunnerGame game, Screen previousScreen) {
+    public PauseMenuScreen(MazeRunnerGame game, GameScreen previousScreen) {
         this.game = game;
         this.previousScreen = previousScreen;
 
@@ -32,7 +31,7 @@ public class PauseMenuScreen implements Screen {
 
         // Pause menu UI
         table.add(new Label("Paused", game.getSkin(), "title")).padBottom(50).row();
-        // 3 buttons onn the pause menu screen:
+
         // Resume Button
         TextButton resumeButton = new TextButton("Resume", game.getSkin());
         table.add(resumeButton).width(300).padBottom(20).row();
@@ -49,11 +48,15 @@ public class PauseMenuScreen implements Screen {
         resumeButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                // Dispose the pause menu screen and resume the previous screen
+                // Stop background music and start maze music
+                game.stopBackgroundMusic();
+                game.playMazeMusic();
+                // Resume the previous game screen
                 game.setScreen(previousScreen);
                 dispose();
             }
         });
+
         mapSelectionButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -61,6 +64,7 @@ public class PauseMenuScreen implements Screen {
                 previousScreen.dispose();
             }
         });
+
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -77,6 +81,8 @@ public class PauseMenuScreen implements Screen {
 
         // Unpause the game when the escape key is pressed
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            game.stopBackgroundMusic();
+            game.playMazeMusic();
             game.setScreen(previousScreen);
             dispose();
         }
@@ -95,13 +101,11 @@ public class PauseMenuScreen implements Screen {
     @Override
     public void show() {
         Gdx.input.setInputProcessor(stage);
-        // Pause the previous screen
         previousScreen.pause();
     }
 
     @Override
     public void hide() {
-        // Resume the previous screen when the pause menu is closed
         previousScreen.resume();
     }
 
@@ -113,20 +117,3 @@ public class PauseMenuScreen implements Screen {
     public void resume() {
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

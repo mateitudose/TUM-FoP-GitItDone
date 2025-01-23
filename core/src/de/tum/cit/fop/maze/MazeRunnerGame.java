@@ -1,3 +1,4 @@
+
 package de.tum.cit.fop.maze;
 
 import com.badlogic.gdx.Game;
@@ -27,6 +28,10 @@ public class MazeRunnerGame extends Game {
     // UI Skin
     private Skin skin;
 
+    // Background Music
+    private Music backgroundMusic;
+    private Music mazeMusic; // Music for the maze screen
+
     /**
      * Constructor for MazeRunnerGame.
      *
@@ -35,19 +40,22 @@ public class MazeRunnerGame extends Game {
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
     }
-
     /**
-     * Called when the game is created. Initializes the SpriteBatch and Skin.
+     * Called when the game is created. Initializes the SpriteBatch, Skin, and music.
      */
     @Override
     public void create() {
         spriteBatch = new SpriteBatch();
         skin = new Skin(Gdx.files.internal("craft/craftacular-ui.json"));
 
-        // Play some background music
-        Music backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("menuMusic.mp3"));
+        // Initialize the background music
+        backgroundMusic = Gdx.audio.newMusic(Gdx.files.internal("menuMusic.mp3"));
         backgroundMusic.setLooping(true);
-//        backgroundMusic.play();
+
+        // Initialize the maze music
+        mazeMusic = Gdx.audio.newMusic(Gdx.files.internal("mazeMusic.mp3"));
+        mazeMusic.setLooping(true);
+
         goToMenu();
     }
 
@@ -55,6 +63,8 @@ public class MazeRunnerGame extends Game {
         if (screen != null) {
             screen.dispose();
         }
+        // Play menu music when entering the menu screen
+        playBackgroundMusic();
         this.setScreen(new MenuScreen(this));
     }
 
@@ -62,6 +72,8 @@ public class MazeRunnerGame extends Game {
         if (screen != null) {
             screen.dispose();
         }
+        // Ensure background music continues in the map selection screen
+        playBackgroundMusic();
         this.setScreen(new MapSelectionScreen(this));
     }
 
@@ -69,7 +81,9 @@ public class MazeRunnerGame extends Game {
         if (screen != null) {
             screen.dispose();
         }
-        // Set the current screen to GameScreen and selected map path
+        // Stop background music and play maze music when entering the game screen
+        stopBackgroundMusic();
+        playMazeMusic();
         this.setScreen(new GameScreen(this, mapPath));
     }
 
@@ -77,11 +91,14 @@ public class MazeRunnerGame extends Game {
         if (screen != null) {
             screen.dispose();
         }
+        // Stop all music when entering the game over screen
+        stopAllMusic();
         this.setScreen(new GameOverScreen(this, mapPath));
     }
 
     public void goToPauseMenu(GameScreen gameScreen) {
-        // Don't dispose the game screen here, as we want to resume the game after the pause menu is closed
+        // Stop all music when entering the pause menu screen
+        stopAllMusic();
         this.setScreen(new PauseMenuScreen(this, gameScreen));
     }
 
@@ -89,30 +106,58 @@ public class MazeRunnerGame extends Game {
         if (screen != null) {
             screen.dispose();
         }
+        // Stop all music when entering the victory screen
+        stopAllMusic();
         this.setScreen(new VictoryScreen(this));
+    }
+
+    private void playBackgroundMusic() {
+        if (!backgroundMusic.isPlaying()) {
+            backgroundMusic.play();
+        }
+    }
+
+    public void playMazeMusic() {
+        if (!mazeMusic.isPlaying()) {
+            mazeMusic.play();
+        }
+    }
+
+    public void stopBackgroundMusic() {
+        if (backgroundMusic.isPlaying()) {
+            backgroundMusic.stop();
+        }
+    }
+
+    private void stopMazeMusic() {
+        if (mazeMusic.isPlaying()) {
+            mazeMusic.stop();
+        }
+    }
+
+    private void stopAllMusic() {
+        stopBackgroundMusic();
+        stopMazeMusic();
     }
 
     @Override
     public void dispose() {
-        menuScreen.dispose();
-        mapSelectionScreen.dispose();
-        gameScreen.dispose();
-        getScreen().hide();
-        getScreen().dispose();
-        spriteBatch.dispose();
-        skin.dispose();
+        // Dispose of global resources
+        if (backgroundMusic != null) {
+            backgroundMusic.dispose();
+        }
+        if (mazeMusic != null) {
+            mazeMusic.dispose();
+        }
+        if (spriteBatch != null) spriteBatch.dispose();
+        if (skin != null) skin.dispose();
+        if (getScreen() != null) {
+            getScreen().dispose();
+        }
     }
 
     public Skin getSkin() {
         return skin;
-    }
-
-    public MenuScreen getMenuScreen() {
-        return menuScreen;
-    }
-
-    public GameScreen getGameScreen() {
-        return gameScreen;
     }
 
     public SpriteBatch getSpriteBatch() {
