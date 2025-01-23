@@ -120,13 +120,10 @@ public class GameScreen implements Screen {
                 Object userDataB = fixtureB.getBody().getUserData();
 
                 // Debug logs to verify collision detection
-//                Gdx.app.log("Contact", "A: " + userDataA.getClass().getSimpleName() + ", B: " + userDataB.getClass().getSimpleName());
-
                 if ((userDataA instanceof Player && userDataB instanceof Fish) ||
                         (userDataB instanceof Player && userDataA instanceof Fish)) {
                     Fish fish = (userDataA instanceof Fish) ? (Fish) userDataA : (Fish) userDataB;
                     if (isBegin) {
-//                        Gdx.app.log("FishContact", "Collected fish at (" + fish.getX() + ", " + fish.getY() + ")");
                         fishToCollect.add(fish);
                     }
                 }
@@ -188,17 +185,14 @@ public class GameScreen implements Screen {
         for (LaserTrap trap : activeContactTraps) {
             if (trap.becameDangerous()) {
                 player.loseLives(1);
-//                System.out.println("Player damaged by activating laser! Lives remaining: " + player.getLives());
             }
         }
 
         // Process collected fish
         for (Fish fish : fishToCollect) {
-//            Gdx.app.log("FishRemoval", "Removing fish at (" + fish.getX() + ", " + fish.getY() + ")");
             mazeMap.removeGameObject(fish);
             if (fish.getBody() != null) {
                 gameWorld.destroyBody(fish.getBody());
-//                Gdx.app.log("FishRemoval", "Body destroyed successfully");
             }
             player.collectFish();
         }
@@ -248,6 +242,12 @@ public class GameScreen implements Screen {
     }
 
     private void checkGameStatus() {
+        // Check for game over first
+        if (player.getLives() <= 0) {
+            game.goToGameOver(mapPath);
+            return;
+        }
+
         for (ExitPoint exitPoint : mazeMap.getExitPoints()) {
             if (exitPoint.checkIfPlayerReachedExit(player, game)) {
                 game.goToVictory();
