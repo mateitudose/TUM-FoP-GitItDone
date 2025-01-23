@@ -13,7 +13,7 @@ import de.tum.cit.fop.maze.MazeMap;
 
 public class Player extends GameEntity {
     private static final float MOVE_SPEED = 2.0f;
-    private static final int PLAYER_LIVES = 3;
+    public static final int PLAYER_LIVES = 3;
     private float speed;
     private World world;
     private Animation<TextureRegion> downAnim, upAnim, rightAnim, leftAnim;

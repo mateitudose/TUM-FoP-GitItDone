@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import box2dLight.RayHandler;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import de.tum.cit.fop.maze.HUD;
 import de.tum.cit.fop.maze.MazeMap;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entities.Player;
@@ -50,6 +51,9 @@ public class GameScreen implements Screen {
 
     private Set<LaserTrap> activeContactTraps = new HashSet<>();
     private final Set<Fish> fishToCollect = new HashSet<>();
+
+    private HUD hud;
+    private final Vector2 playerPosition = new Vector2();
 
     public GameScreen(MazeRunnerGame game, String mapPath) {
         this.game = game;
@@ -153,10 +157,11 @@ public class GameScreen implements Screen {
         float entryX = (entryPosition.x + 0.5f) * MazeMap.TILE_SIZE / 16f;
         float entryY = (entryPosition.y + 0.5f) * MazeMap.TILE_SIZE / 16f;
         player = new Player(gameWorld, mazeMap, new Vector2(entryX, entryY));
-
         Vector2 playerPosition = player.getBody().getPosition();
         camera.position.set(playerPosition.x * MazeMap.TILE_SIZE, playerPosition.y * MazeMap.TILE_SIZE, 0);
         camera.update();
+
+        hud = new HUD(player, mazeMap);
     }
 
     private Vector2 findEntryPoint() {
@@ -201,6 +206,8 @@ public class GameScreen implements Screen {
         checkGameStatus();
         updateCamera();
 
+        playerPosition.set(player.getBody().getPosition());
+
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         for (List<GameObject> objectList : mazeMap.getGameObjects().values()) {
@@ -208,8 +215,10 @@ public class GameScreen implements Screen {
                 object.render(batch);
             }
         }
-
         player.render(batch);
+        // Switch to screen coordinates for HUD rendering
+        batch.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
+        hud.render(batch, playerPosition);
         batch.end();
 
         rayHandler.setCombinedMatrix(camera);

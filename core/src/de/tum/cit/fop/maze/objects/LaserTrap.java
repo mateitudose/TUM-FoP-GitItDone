@@ -33,7 +33,7 @@ public class LaserTrap extends GameObject {
     private boolean isPaused = false;
 
     public LaserTrap(int x, int y) {
-        super(x, y, 8, 16, new TextureRegion(new Texture("editedLaser.png"), 32, 0, 32, 64));
+        super(x, y, 8, 16, new TextureRegion(new Texture("laser.png"), 32, 0, 32, 64));
         sprite.setPosition(x * TILE_SIZE + 3, y * TILE_SIZE);
         loadAnimations();
         stateTime = 0f;
@@ -41,7 +41,7 @@ public class LaserTrap extends GameObject {
     }
 
     private void loadAnimations() {
-        TextureRegion[][] frames = TextureRegion.split(new Texture("editedLaser.png"), 32, 64);
+        TextureRegion[][] frames = TextureRegion.split(new Texture("laser.png"), 32, 64);
         TextureRegion[] activatingFrames = new TextureRegion[ACTIVATING_FRAMES];
         TextureRegion[] activeFrames = new TextureRegion[ACTIVE_FRAMES];
         TextureRegion[] deactivatingFrames = new TextureRegion[DEACTIVATING_FRAMES];
