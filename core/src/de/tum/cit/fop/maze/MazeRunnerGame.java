@@ -40,6 +40,7 @@ public class MazeRunnerGame extends Game {
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
     }
+
     /**
      * Called when the game is created. Initializes the SpriteBatch, Skin, and music.
      */

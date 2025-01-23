@@ -178,6 +178,7 @@ public class GameScreen implements Screen {
     private void checkGameStatus() {
         for (ExitPoint exitPoint : mazeMap.getExitPoints()) {
             if (exitPoint.checkIfPlayerReachedExit(player, game)) {
+                game.goToVictory();
                 return;
             }
         }
@@ -221,11 +222,8 @@ public class GameScreen implements Screen {
     @Override
     public void hide() {}
 
+    // TODO: Dispose of all resources
     @Override
     public void dispose() {
-        batch.dispose();
-        gameWorld.dispose();
-        rayHandler.dispose();
-        debugRenderer.dispose();
     }
 }
