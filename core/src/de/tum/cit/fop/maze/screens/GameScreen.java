@@ -216,6 +216,12 @@ public class GameScreen implements Screen {
         }
         fishToCollect.clear();
 
+        if (player.getCollectedFish() == 1) {
+            for (ExitPoint exit : mazeMap.getExitPoints()) {
+                exit.disableCollision();
+            }
+        }
+
         checkGameStatus();
         updateCamera();
 

@@ -104,7 +104,7 @@ public class MazeMap {
                                 }
                                 case 2 -> {
                                     if (!isCorner(x, y)) {
-                                        ExitPoint exitPoint = new ExitPoint(x, y, TILE_SIZE, exitTexture);
+                                        ExitPoint exitPoint = new ExitPoint(x, y, TILE_SIZE, exitTexture, world);
                                         addGameObject(key, exitPoint);
                                         exitPoints.add(exitPoint);
                                         hasExit = true;
