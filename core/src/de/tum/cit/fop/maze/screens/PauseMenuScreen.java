@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -18,12 +20,16 @@ public class PauseMenuScreen implements Screen {
     private final Stage stage;
     private final MazeRunnerGame game;
     private final GameScreen previousScreen; // Changed to GameScreen for proper handling
+    private final Texture backgroundTexture; // Texture for the background image
+    private final SpriteBatch batch; // SpriteBatch to draw the background
 
     public PauseMenuScreen(MazeRunnerGame game, GameScreen previousScreen) {
         this.game = game;
         this.previousScreen = previousScreen;
 
         stage = new Stage(new ScreenViewport(), game.getSpriteBatch());
+        batch = new SpriteBatch(); // Initialize SpriteBatch for drawing the background
+        backgroundTexture = new Texture(Gdx.files.internal("assets/pixelart.png")); // Load the background image
 
         Table table = new Table();
         table.setFillParent(true);
@@ -76,6 +82,13 @@ public class PauseMenuScreen implements Screen {
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        // Draw the background image
+        batch.begin();
+        batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // Draw the background
+        batch.end();
+
+        // Update and draw the stage (UI elements)
         stage.act(delta);
         stage.draw();
 
@@ -95,6 +108,9 @@ public class PauseMenuScreen implements Screen {
 
     @Override
     public void dispose() {
+        // Dispose resources
+        backgroundTexture.dispose();
+        batch.dispose();
         stage.dispose();
     }
 

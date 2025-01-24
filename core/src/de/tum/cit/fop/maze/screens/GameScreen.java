@@ -19,6 +19,7 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entities.Player;
 import de.tum.cit.fop.maze.objects.*;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import de.tum.cit.fop.maze.objects.LaserTrap;
 
 import java.util.HashSet;
 import java.util.List;
@@ -105,6 +106,7 @@ public class GameScreen implements Screen {
                             activeContactTraps.add(trap);
                             if (trap.isDangerous()) {
                                 player.loseLives(1);
+                                System.out.println("Player damaged by laser! Lives remaining: " + player.getLives());
                             }
                         } else {
                             activeContactTraps.remove(trap);
@@ -234,6 +236,12 @@ public class GameScreen implements Screen {
                 object.render(batch);
             }
         }
+        Heart heart = mazeMap.randomKey();
+        if (heart != null) {
+            heart.render(batch);
+        }
+
+
         player.render(batch);
         // Switch to screen coordinates for HUD rendering
         batch.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
@@ -326,5 +334,6 @@ public class GameScreen implements Screen {
     // TODO: Dispose of all resources
     @Override
     public void dispose() {
+
     }
 }
