@@ -167,6 +167,10 @@ public class MazeMap {
                                     shape.dispose();
                                     addGameObject(key, fish);
                                 }
+                                case 6 -> {
+                                    SlowTile slowTile = new SlowTile(x, y, world);
+                                    addGameObject(key, slowTile);
+                                }
                             }
                         }
                     } else {

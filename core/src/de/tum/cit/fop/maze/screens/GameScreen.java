@@ -17,11 +17,8 @@ import de.tum.cit.fop.maze.HUD;
 import de.tum.cit.fop.maze.MazeMap;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 import de.tum.cit.fop.maze.entities.Player;
-import de.tum.cit.fop.maze.objects.ExitPoint;
-import de.tum.cit.fop.maze.objects.Fish;
-import de.tum.cit.fop.maze.objects.GameObject;
+import de.tum.cit.fop.maze.objects.*;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import de.tum.cit.fop.maze.objects.LaserTrap;
 
 import java.util.HashSet;
 import java.util.List;
@@ -80,6 +77,7 @@ public class GameScreen implements Screen {
             public void beginContact(Contact contact) {
                 handleTrapContact(contact, true);
                 handleFishContact(contact, true);
+                handleSlowTileContact(contact, true);
             }
 
             @Override
@@ -107,7 +105,6 @@ public class GameScreen implements Screen {
                             activeContactTraps.add(trap);
                             if (trap.isDangerous()) {
                                 player.loseLives(1);
-                                System.out.println("Player damaged by laser! Lives remaining: " + player.getLives());
                             }
                         } else {
                             activeContactTraps.remove(trap);
@@ -129,6 +126,22 @@ public class GameScreen implements Screen {
                     Fish fish = (userDataA instanceof Fish) ? (Fish) userDataA : (Fish) userDataB;
                     if (isBegin) {
                         fishToCollect.add(fish);
+                    }
+                }
+            }
+
+            private void handleSlowTileContact(Contact contact, boolean isBegin) {
+                Fixture fixtureA = contact.getFixtureA();
+                Fixture fixtureB = contact.getFixtureB();
+
+                // Check if either fixture is the slow tile and the other is the player
+                if ((fixtureA.getBody().getUserData() instanceof SlowTile &&
+                        fixtureB.getBody().getUserData() instanceof Player) ||
+                        (fixtureB.getBody().getUserData() instanceof SlowTile &&
+                                fixtureA.getBody().getUserData() instanceof Player)) {
+
+                    if (isBegin) {
+                        player.applySlowEffect(5);
                     }
                 }
             }

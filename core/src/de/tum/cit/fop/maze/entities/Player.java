@@ -23,6 +23,7 @@ public class Player extends GameEntity {
     private boolean isMoving = false;
     private int lives;
     private int collectedFish = 0;
+    private float slowTimer;
 
     public Player(World world, MazeMap mazeMap, Vector2 startPosition) {
         super((int) startPosition.x, (int) startPosition.y, 20, 20, new TextureRegion(new Texture(Gdx.files.internal("cat.png")), 0, 32, 32, 32));
@@ -32,6 +33,7 @@ public class Player extends GameEntity {
         this.body = createBody(startPosition);
         this.speed = MOVE_SPEED;
         this.lives = PLAYER_LIVES;
+        this.slowTimer = 0;
     }
 
     private void loadAnimations() {
@@ -71,7 +73,7 @@ public class Player extends GameEntity {
         fixtureDef.density = 1.0f;
         fixtureDef.friction = 0.0f;
         fixtureDef.filter.categoryBits = 0x0001;
-        fixtureDef.filter.maskBits = 0x0002 | 0x0004;
+        fixtureDef.filter.maskBits = 0x0002 | 0x0004 | 0x0008; // Collide with walls, fish, and slow tiles
 
         Fixture fixture = body.createFixture(fixtureDef);
         fixture.setSensor(true);
@@ -100,8 +102,16 @@ public class Player extends GameEntity {
         Vector2 velocity = body.getLinearVelocity();
         isMoving = velocity.x != 0 || velocity.y != 0;
 
+        // Still affected by slow effect
+        if (slowTimer > 0) {
+            slowTimer -= delta;
+            if (slowTimer <= 0) {
+                speed = MOVE_SPEED;
+            }
+        }
+
         float effectiveSpeed = speed;
-        if (Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)) {
+        if ((Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)) && slowTimer <= 0) {
             effectiveSpeed *= 2;
         }
 
@@ -176,5 +186,14 @@ public class Player extends GameEntity {
 
     public int getCollectedFish() {
         return collectedFish;
+    }
+
+    public void applySlowEffect(float duration) {
+        this.speed = MOVE_SPEED / 3f;
+        this.slowTimer = duration;
+    }
+
+    public float getMovementSpeed() {
+        return speed;
     }
 }

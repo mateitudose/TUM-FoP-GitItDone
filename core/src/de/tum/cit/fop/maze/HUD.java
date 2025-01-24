@@ -42,7 +42,7 @@ public class HUD {
 
         for (int i = 0; i < maxLives; i++) {
             TextureRegion heart = (i < lives) ? fullHeartTexture : emptyHeartTexture;
-            batch.draw(heart, heartX + (i * 30), heartY, 24, 24);
+            batch.draw(heart, heartX + (i * 30), heartY, 30, 30);
         }
 
         // Draw fish counter

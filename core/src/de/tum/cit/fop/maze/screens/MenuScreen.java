@@ -39,10 +39,10 @@ public class MenuScreen implements Screen {
         stage.addActor(table); // Add the table to the stage
 
         // Add a label as a title
-        table.add(new Label("Hello World from the Menu!", game.getSkin(), "title")).padBottom(80).row();
+        table.add(new Label("A Whiskered Thief", game.getSkin(), "title")).padBottom(80).row();
 
         // Create and add a button to go to the game screen
-        TextButton goToMapSelectionButton = new TextButton("Select Map", game.getSkin());
+        TextButton goToMapSelectionButton = new TextButton("Play Game", game.getSkin());
         table.add(goToMapSelectionButton).width(300).row();
 
         goToMapSelectionButton.addListener(new ChangeListener() {
