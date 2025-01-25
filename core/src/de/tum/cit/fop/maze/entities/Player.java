@@ -2,6 +2,7 @@ package de.tum.cit.fop.maze.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -24,6 +25,10 @@ public class Player extends GameEntity {
     private int lives;
     private int collectedFish = 0;
     private float slowTimer;
+
+    private float damageEffectTimer = 0f;
+    private static final float DAMAGE_EFFECT_DURATION = 0.5f;
+    private final Color damageColor = new Color(1, 0.3f, 0.3f, 1); // Red tint color
 
     public Player(World world, MazeMap mazeMap, Vector2 startPosition) {
         super((int) startPosition.x, (int) startPosition.y, 20, 20, new TextureRegion(new Texture(Gdx.files.internal("cat.png")), 0, 32, 32, 32));
@@ -90,6 +95,16 @@ public class Player extends GameEntity {
     @Override
     public void update(float delta) {
         stateTime += delta;
+
+        if (damageEffectTimer > 0) {
+            damageEffectTimer = Math.max(0, damageEffectTimer - delta);
+            // Calculate color interpolation
+            float progress = damageEffectTimer / DAMAGE_EFFECT_DURATION;
+            Color currentColor = new Color(Color.WHITE).lerp(damageColor, progress);
+            sprite.setColor(currentColor);
+        } else {
+            sprite.setColor(Color.WHITE);
+        }
 
         Vector2 position = body.getPosition();
         float clampedX = Math.max(0.5f, Math.min(position.x, mazeMap.getMazeWidth() - 0.5f));
@@ -166,6 +181,7 @@ public class Player extends GameEntity {
 
     public void loseLives(int lives) {
         this.lives -= lives;
+        this.damageEffectTimer = DAMAGE_EFFECT_DURATION;
     }
 
     public void addLives(int lives) {
