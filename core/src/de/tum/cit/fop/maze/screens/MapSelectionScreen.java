@@ -2,12 +2,14 @@ package de.tum.cit.fop.maze.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
@@ -15,11 +17,19 @@ public class MapSelectionScreen implements Screen {
 
     private final MazeRunnerGame game;
     private final Stage stage;
+    private Sound buttonClickSound; // Correctly declared Sound
 
     public MapSelectionScreen(MazeRunnerGame game) {
         this.game = game;
         stage = new Stage(new ScreenViewport(), game.getSpriteBatch());
         Gdx.input.setInputProcessor(stage); // Set stage as input processor
+
+        try {
+            // Load the button click sound
+            buttonClickSound = Gdx.audio.newSound(Gdx.files.internal("assets/buttonsound.mp3"));
+        } catch (Exception e) {
+            System.err.println("Error loading sound file: " + e.getMessage());
+        }
 
         Table table = new Table();
         table.setFillParent(true);
@@ -30,7 +40,7 @@ public class MapSelectionScreen implements Screen {
 
         // List available maps
         FileHandle[] mapFiles = Gdx.files.internal("maps").list(".properties");
-        if (mapFiles.length == 0) {
+        if (mapFiles == null || mapFiles.length == 0) {
             table.add(new Label("No maps available!", game.getSkin())).row();
             return;
         }
@@ -42,7 +52,15 @@ public class MapSelectionScreen implements Screen {
             mapButton.addListener(new ChangeListener() {
                 @Override
                 public void changed(ChangeEvent event, Actor actor) {
-                    game.goToGame(mapFile.path());
+                    playButtonClickSound();
+
+                    // Delay transition by 0.5 seconds
+                    Timer.schedule(new Timer.Task() {
+                        @Override
+                        public void run() {
+                            game.goToGame(mapFile.path());
+                        }
+                    }, 0.5f);
                 }
             });
         }
@@ -53,9 +71,25 @@ public class MapSelectionScreen implements Screen {
         backButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                game.goToMenu();
+                playButtonClickSound();
+
+                // Delay transition by 0.5 seconds
+                Timer.schedule(new Timer.Task() {
+                    @Override
+                    public void run() {
+                        game.goToMenu();
+                    }
+                }, 0.5f);
             }
         });
+    }
+
+    private void playButtonClickSound() {
+        if (buttonClickSound != null) {
+            buttonClickSound.play();
+        } else {
+            System.err.println("Button click sound not loaded.");
+        }
     }
 
     @Override
@@ -73,6 +107,9 @@ public class MapSelectionScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
+        if (buttonClickSound != null) {
+            buttonClickSound.dispose();
+        }
     }
 
     @Override
