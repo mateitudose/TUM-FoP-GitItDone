@@ -29,6 +29,8 @@ public class Player extends GameEntity {
     private float damageEffectTimer = 0f;
     private static final float DAMAGE_EFFECT_DURATION = 0.5f;
     private final Color damageColor = new Color(1, 0.3f, 0.3f, 1); // Red tint color
+    private float contactTimer = 0f;
+    private static final float CONTACT_DAMAGE_INTERVAL = 1.0f;
 
     public Player(World world, MazeMap mazeMap, Vector2 startPosition) {
         super((int) startPosition.x, (int) startPosition.y, 20, 20, new TextureRegion(new Texture(Gdx.files.internal("cat.png")), 0, 32, 32, 32));
@@ -151,7 +153,33 @@ public class Player extends GameEntity {
             body.setLinearVelocity(velX, velY);
         }
 
+        // Check for contact with enemies
+        if (isInContactWithEnemy()) {
+            contactTimer += delta;
+            // If enemy contact is maintained for a certain time, lose again a life
+            if (contactTimer >= CONTACT_DAMAGE_INTERVAL) {
+                loseLives(1);
+                contactTimer = 0f;
+            }
+        } else {
+            contactTimer = 0f;
+        }
+
         updateAnimation();
+    }
+
+    private boolean isInContactWithEnemy() {
+        for (Contact contact : world.getContactList()) {
+            if (contact.isTouching()) {
+                Fixture fixtureA = contact.getFixtureA();
+                Fixture fixtureB = contact.getFixtureB();
+                if ((fixtureA.getBody().getUserData() instanceof Enemy && fixtureB.getBody().getUserData() == this) ||
+                        (fixtureB.getBody().getUserData() instanceof Enemy && fixtureA.getBody().getUserData() == this)) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void updateAnimation() {
