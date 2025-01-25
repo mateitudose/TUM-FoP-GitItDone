@@ -16,12 +16,14 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.HUD;
 import de.tum.cit.fop.maze.MazeMap;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import de.tum.cit.fop.maze.entities.Enemy;
 import de.tum.cit.fop.maze.entities.Player;
 import de.tum.cit.fop.maze.objects.*;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import de.tum.cit.fop.maze.objects.LaserTrap;
+import de.tum.cit.fop.maze.pathfinding.Algorithm;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
@@ -41,6 +43,7 @@ public class GameScreen implements Screen {
 
     private RayHandler rayHandler;
     private Box2DDebugRenderer debugRenderer;
+    private Algorithm pathfinder;
 
     private int lastWidth = -1;
     private int lastHeight = -1;
@@ -80,6 +83,7 @@ public class GameScreen implements Screen {
                 handleFishContact(contact, true);
                 handleSlowTileContact(contact, true);
                 handleHeartContact(contact, true);
+                handleEnemyContact(contact, true);
             }
 
             @Override
@@ -98,19 +102,22 @@ public class GameScreen implements Screen {
             }
 
             private void handleTrapContact(Contact contact, boolean isBegin) {
-                Fixture[] fixtures = {contact.getFixtureA(), contact.getFixtureB()};
+                Fixture fixtureA = contact.getFixtureA();
+                Fixture fixtureB = contact.getFixtureB();
 
-                for (Fixture fixture : fixtures) {
-                    Object userData = fixture.getBody().getUserData();
-                    if (userData instanceof LaserTrap trap) {
-                        if (isBegin) {
-                            activeContactTraps.add(trap);
-                            if (trap.isDangerous()) {
-                                player.loseLives(1);
-                            }
-                        } else {
-                            activeContactTraps.remove(trap);
+                Object userDataA = fixtureA.getBody().getUserData();
+                Object userDataB = fixtureB.getBody().getUserData();
+
+                if ((userDataA instanceof Player && userDataB instanceof LaserTrap) ||
+                        (userDataB instanceof Player && userDataA instanceof LaserTrap)) {
+                    LaserTrap trap = (userDataA instanceof LaserTrap) ? (LaserTrap) userDataA : (LaserTrap) userDataB;
+                    if (isBegin) {
+                        activeContactTraps.add(trap);
+                        if (trap.isDangerous()) {
+                            player.loseLives(1);
                         }
+                    } else {
+                        activeContactTraps.remove(trap);
                     }
                 }
             }
@@ -122,7 +129,6 @@ public class GameScreen implements Screen {
                 Object userDataA = fixtureA.getBody().getUserData();
                 Object userDataB = fixtureB.getBody().getUserData();
 
-                // Debug logs to verify collision detection
                 if ((userDataA instanceof Player && userDataB instanceof Fish) ||
                         (userDataB instanceof Player && userDataA instanceof Fish)) {
                     Fish fish = (userDataA instanceof Fish) ? (Fish) userDataA : (Fish) userDataB;
@@ -163,13 +169,28 @@ public class GameScreen implements Screen {
                     }
                 }
             }
+
+            private void handleEnemyContact(Contact contact, boolean isBegin) {
+                Fixture fixtureA = contact.getFixtureA();
+                Fixture fixtureB = contact.getFixtureB();
+
+                Object userDataA = fixtureA.getBody().getUserData();
+                Object userDataB = fixtureB.getBody().getUserData();
+
+                if ((userDataA instanceof Player && userDataB instanceof Enemy) ||
+                        (userDataB instanceof Player && userDataA instanceof Enemy)) {
+
+                    if (isBegin && player.canTakeDamage()) {
+                        player.loseLives(1);
+                    }
+                }
+            }
         });
 
         // Load the maze
         int windowWidth = Gdx.graphics.getWidth();
         int windowHeight = Gdx.graphics.getHeight();
         mazeMap = new MazeMap(mapPath, windowWidth, windowHeight, gameWorld);
-
         // Initialize the camera
         camera = new OrthographicCamera();
         camera.setToOrtho(false);
@@ -188,6 +209,12 @@ public class GameScreen implements Screen {
         float entryX = (entryPosition.x + 0.5f) * MazeMap.TILE_SIZE / 16f;
         float entryY = (entryPosition.y + 0.5f) * MazeMap.TILE_SIZE / 16f;
         player = new Player(gameWorld, mazeMap, new Vector2(entryX, entryY));
+
+        // Initialize the pathfinder and set it to the calculate player paths in the maze map
+        pathfinder = new Algorithm(mazeMap);
+        mazeMap.setPathfinder(pathfinder);
+        mazeMap.setPlayer(player);
+
         Vector2 playerPosition = player.getBody().getPosition();
         camera.position.set(playerPosition.x * MazeMap.TILE_SIZE, playerPosition.y * MazeMap.TILE_SIZE, 0);
         camera.update();
@@ -216,6 +243,10 @@ public class GameScreen implements Screen {
         // Update the animations of the laser traps
         for (LaserTrap laserTrap : mazeMap.getLaserTraps()) {
             laserTrap.update(delta);
+        }
+
+        for (Enemy enemy : mazeMap.getEnemies()) {
+            enemy.update(delta);
         }
 
         for (LaserTrap trap : activeContactTraps) {
@@ -261,6 +292,10 @@ public class GameScreen implements Screen {
         batch.begin();
         mazeMap.render(batch);
         player.render(batch);
+
+        for (Enemy enemy : mazeMap.getEnemies()) {
+            enemy.render(batch);
+        }
 
         // Switch to screen coordinates for HUD rendering
         batch.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));

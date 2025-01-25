@@ -78,7 +78,7 @@ public class Player extends GameEntity {
         fixtureDef.density = 1.0f;
         fixtureDef.friction = 0.0f;
         fixtureDef.filter.categoryBits = 0x0001;
-        fixtureDef.filter.maskBits = 0x0002 | 0x0004 | 0x0008 | 0x0010; // Collide with walls, fish, slow tiles and hearts
+        fixtureDef.filter.maskBits = 0x0002 | 0x0004 | 0x0008 | 0x0010 | 0x0009; // Collide with walls, fish, slow tiles, hearts and enemies
 
         Fixture fixture = body.createFixture(fixtureDef);
         fixture.setSensor(true);
@@ -217,6 +217,10 @@ public class Player extends GameEntity {
         if (canGainLife()) {
             lives++;
         }
+    }
+
+    public boolean canTakeDamage() {
+        return damageEffectTimer <= 0;
     }
 
     public float getMovementSpeed() {

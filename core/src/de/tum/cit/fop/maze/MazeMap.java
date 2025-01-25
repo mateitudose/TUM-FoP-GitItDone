@@ -4,9 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.physics.box2d.*;
 import de.tum.cit.fop.maze.entities.Enemy;
+import de.tum.cit.fop.maze.entities.Player;
 import de.tum.cit.fop.maze.objects.*;
+import de.tum.cit.fop.maze.pathfinding.Algorithm;
 
 import java.util.*;
 
@@ -21,6 +25,8 @@ public class MazeMap {
     private final World world;
     public int entryX, entryY;
     public static final int TILE_SIZE = 16;
+
+    private Algorithm pathfinder;
 
     public enum WallType {
         HORIZONTAL, VERTICAL, CORNER_LU, CORNER_RU, CORNER_LD, CORNER_RD
@@ -139,7 +145,7 @@ public class MazeMap {
                                 }
                                 case 4 -> {
                                     addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
-                                    addGameObject(key, new Enemy(x, y, TILE_SIZE, enemyTexture));
+                                    addGameObject(key, new Enemy(world, this, new Vector2(x, y), pathfinder));
                                 }
                                 case 5 -> {
                                     addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
@@ -326,6 +332,20 @@ public class MazeMap {
         return object instanceof Wall;
     }
 
+    public boolean isExitorEntrance(int x, int y) {
+        String key = x + "," + y;
+        List<GameObject> objects = gameObjects.get(key);
+        if (objects != null) {
+            return objects.stream()
+                    .anyMatch(o -> o instanceof ExitPoint || o instanceof EntryPoint);
+        }
+        return false;
+    }
+
+    public boolean isWalkable(int x, int y) {
+        return !isWall(x, y) && !isExitorEntrance(x, y);
+    }
+
     private GameObject getGameObjectAt(int x, int y) {
         String key = x + "," + y;
         List<GameObject> objects = gameObjects.get(key);
@@ -341,11 +361,35 @@ public class MazeMap {
         }
     }
 
+    public List<Enemy> getEnemies() {
+        List<Enemy> enemies = new ArrayList<>();
+        for (List<GameObject> objects : gameObjects.values()) {
+            for (GameObject object : objects) {
+                if (object instanceof Enemy) {
+                    enemies.add((Enemy) object);
+                }
+            }
+        }
+        return enemies;
+    }
+
     public List<ExitPoint> getExitPoints() {
         return exitPoints;
     }
 
     public List<LaserTrap> getLaserTraps() {
         return laserTraps;
+    }
+
+    public void setPlayer(Player player) {
+        for (Enemy enemy : getEnemies()) {
+            enemy.setPlayer(player);
+        }
+    }
+
+    public void setPathfinder(Algorithm pathfinder) {
+        for (Enemy enemy : getEnemies()) {
+            enemy.setPathfinder(pathfinder);
+        }
     }
 }
