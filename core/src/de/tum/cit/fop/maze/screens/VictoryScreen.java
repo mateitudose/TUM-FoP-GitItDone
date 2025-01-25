@@ -2,7 +2,6 @@ package de.tum.cit.fop.maze.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -10,27 +9,21 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.Timer;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
+/**
+ * Displays the victory screen when the player wins.
+ */
 public class VictoryScreen implements Screen {
 
     private final MazeRunnerGame game;
     private final Stage stage;
-    private Sound buttonClickSound; // Correctly declared Sound
 
     public VictoryScreen(MazeRunnerGame game) {
         this.game = game;
         stage = new Stage(new ScreenViewport(), game.getSpriteBatch());
         Gdx.input.setInputProcessor(stage); // Set stage as input processor
-
-        try {
-            // Load the button click sound
-            buttonClickSound = Gdx.audio.newSound(Gdx.files.internal("assets/buttonsound.mp3"));
-        } catch (Exception e) {
-            System.err.println("Error loading sound file: " + e.getMessage());
-        }
 
         Table table = new Table();
         table.setFillParent(true);
@@ -50,41 +43,16 @@ public class VictoryScreen implements Screen {
         mainMenuButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                playButtonClickSound();
-
-                // Delay transition by 0.3 seconds
-                Timer.schedule(new Timer.Task() {
-                    @Override
-                    public void run() {
-                        game.goToMenu(); // Navigate to the main menu after sound
-                    }
-                }, 0.3f);
+                game.goToMenu(); // Navigate to the main menu
             }
         });
 
         exitButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
-                playButtonClickSound();
-
-                // Delay transition by 0.3 seconds
-                Timer.schedule(new Timer.Task() {
-                    @Override
-                    public void run() {
-                        Gdx.app.exit(); // Exit the game after sound
-                    }
-                }, 0.3f);
+                Gdx.app.exit(); // Exit the game
             }
         });
-    }
-
-    // Method to play the sound
-    private void playButtonClickSound() {
-        if (buttonClickSound != null) {
-            buttonClickSound.play();
-        } else {
-            System.err.println("Button click sound not loaded.");
-        }
     }
 
     @Override
@@ -102,9 +70,6 @@ public class VictoryScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
-        if (buttonClickSound != null) {
-            buttonClickSound.dispose();
-        }
     }
 
     @Override

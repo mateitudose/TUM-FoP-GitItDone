@@ -253,7 +253,6 @@ public class GameScreen implements Screen {
             if (trap.becameDangerous()) {
                 player.loseLives(1);
             }
-
         }
 
         // Process collected fish
