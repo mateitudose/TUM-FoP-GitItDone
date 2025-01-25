@@ -18,8 +18,8 @@ public class ExitPoint extends GameObject {
     private void createBody(World world, int x, int y, int tileSize) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
-        float posX = (x + 0.5f) * tileSize / MazeMap.TILE_SIZE;
-        float posY = (y + 0.5f) * tileSize / MazeMap.TILE_SIZE;
+        float posX = getX() + 0.5f;
+        float posY = getY() + 0.5f;
         bodyDef.position.set(posX, posY);
 
         body = world.createBody(bodyDef);

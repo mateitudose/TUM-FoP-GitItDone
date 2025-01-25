@@ -35,10 +35,7 @@ public class Heart extends GameObject {
     private void createBody(World world) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
-        bodyDef.position.set(
-                (getX() + 0.5f) * MazeMap.TILE_SIZE / MazeMap.TILE_SIZE,
-                (getY() + 0.5f) * MazeMap.TILE_SIZE / MazeMap.TILE_SIZE
-        );
+        bodyDef.position.set((getX() + 0.5f), (getY() + 0.5f));
 
         body = world.createBody(bodyDef);
         CircleShape shape = new CircleShape();

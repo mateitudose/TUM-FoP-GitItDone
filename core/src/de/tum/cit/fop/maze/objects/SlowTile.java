@@ -15,7 +15,7 @@ public class SlowTile extends GameObject {
     private void createPhysicsBody(World world) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.StaticBody;
-        bodyDef.position.set(x + 0.5f, y + 0.5f);
+        bodyDef.position.set(getX() + 0.5f, getY() + 0.5f);
 
         body = world.createBody(bodyDef);
         PolygonShape shape = new PolygonShape();

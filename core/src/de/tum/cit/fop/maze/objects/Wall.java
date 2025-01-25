@@ -19,10 +19,7 @@ public class Wall extends GameObject {
         bodyDef.type = BodyDef.BodyType.StaticBody;
 
         // Center of the tile
-        bodyDef.position.set(
-                (x + 0.5f) * MazeMap.TILE_SIZE / MazeMap.TILE_SIZE,
-                (y + 0.5f) * MazeMap.TILE_SIZE / MazeMap.TILE_SIZE
-        );
+        bodyDef.position.set(getX() + 0.5f, getY() + 0.5f);
 
         Body body = world.createBody(bodyDef);
         PolygonShape shape = new PolygonShape();
