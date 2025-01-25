@@ -4,8 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -13,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
 /**
@@ -22,8 +21,6 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 public class MenuScreen implements Screen {
 
     private final Stage stage;
-    private final Texture backgroundTexture; // Texture for the background image
-    private final SpriteBatch batch; // SpriteBatch to draw the background
 
     /**
      * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
@@ -34,14 +31,9 @@ public class MenuScreen implements Screen {
         var camera = new OrthographicCamera();
         camera.zoom = 1.5f; // Set camera zoom for a closer view
 
-        // Create a viewport with the camera
-        stage = new Stage(new ScreenViewport(camera), game.getSpriteBatch());
+        Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera
+        stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
 
-        // Initialize SpriteBatch to draw the background
-        batch = new SpriteBatch();
-
-        // Load the background texture
-        backgroundTexture = new Texture(Gdx.files.internal("assets/pixelart.png")); // Replace with your image path
         Table table = new Table(); // Create a table for layout
         table.setFillParent(true); // Make the table fill the stage
         stage.addActor(table); // Add the table to the stage
@@ -53,7 +45,6 @@ public class MenuScreen implements Screen {
         TextButton goToMapSelectionButton = new TextButton("Play Game", game.getSkin());
         table.add(goToMapSelectionButton).width(300).row();
 
-        // Add an action to the button
         goToMapSelectionButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -64,17 +55,9 @@ public class MenuScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        // Clear the screen
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        // Draw the background image
-        batch.begin();
-        batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // Draw the background to fill the screen
-        batch.end();
-
-        // Update and draw the UI stage
-        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
-        stage.draw();
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT); // Clear the screen
+        stage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f)); // Update the stage
+        stage.draw(); // Draw the stage
     }
 
     @Override
@@ -84,9 +67,7 @@ public class MenuScreen implements Screen {
 
     @Override
     public void dispose() {
-        // Dispose of the resources when no longer needed
-        backgroundTexture.dispose();
-        batch.dispose();
+        // Dispose of the stage when screen is disposed
         stage.dispose();
     }
 

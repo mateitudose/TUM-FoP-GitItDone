@@ -3,7 +3,6 @@ package de.tum.cit.fop.maze.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -21,16 +20,10 @@ public class GameOverScreen implements Screen {
     private final MazeRunnerGame game;
     private final Stage stage;
     private String mapPath;
-    private Texture backgroundTexture;
 
     public GameOverScreen(MazeRunnerGame game, String mapPath) {
         this.mapPath = mapPath;
         this.game = game;
-
-        // Load background texture
-        backgroundTexture = new Texture(Gdx.files.internal("assets/pixelart.png"));
-
-
         stage = new Stage(new ScreenViewport(), game.getSpriteBatch());
         Gdx.input.setInputProcessor(stage); // Set stage as input processor
 
@@ -76,15 +69,7 @@ public class GameOverScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        // Clear the screen
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        // Draw the background
-        game.getSpriteBatch().begin();
-        game.getSpriteBatch().draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        game.getSpriteBatch().end();
-
-        // Draw the stage
         stage.act(delta);
         stage.draw();
     }
@@ -97,7 +82,6 @@ public class GameOverScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
-        backgroundTexture.dispose(); // Dispose of the background texture
     }
 
     @Override
@@ -114,3 +98,4 @@ public class GameOverScreen implements Screen {
     @Override
     public void hide() {}
 }
+

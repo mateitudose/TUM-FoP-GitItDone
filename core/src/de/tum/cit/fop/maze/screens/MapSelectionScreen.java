@@ -4,8 +4,6 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
@@ -17,15 +15,10 @@ public class MapSelectionScreen implements Screen {
 
     private final MazeRunnerGame game;
     private final Stage stage;
-    private final Texture backgroundTexture; // Texture for the background image
-    private final SpriteBatch batch; // SpriteBatch to draw the background
 
     public MapSelectionScreen(MazeRunnerGame game) {
         this.game = game;
         stage = new Stage(new ScreenViewport(), game.getSpriteBatch());
-        batch = new SpriteBatch(); // Initialize SpriteBatch for drawing the background
-        backgroundTexture = new Texture(Gdx.files.internal("assets/pixelart.png"));
-
         Gdx.input.setInputProcessor(stage); // Set stage as input processor
 
         Table table = new Table();
@@ -67,15 +60,7 @@ public class MapSelectionScreen implements Screen {
 
     @Override
     public void render(float delta) {
-        // Clear the screen
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        // Draw the background image
-        batch.begin();
-        batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // Draw the background
-        batch.end();
-
-        // Update and draw the UI stage
         stage.act(delta);
         stage.draw();
     }
@@ -87,9 +72,6 @@ public class MapSelectionScreen implements Screen {
 
     @Override
     public void dispose() {
-        // Dispose of resources when no longer needed
-        backgroundTexture.dispose();
-        batch.dispose();
         stage.dispose();
     }
 

@@ -1,11 +1,8 @@
 package de.tum.cit.fop.maze.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -15,19 +12,17 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
+/**
+ * Displays the victory screen when the player wins.
+ */
 public class VictoryScreen implements Screen {
 
     private final MazeRunnerGame game;
     private final Stage stage;
-    private final Texture backgroundTexture; // Texture for the background image
-    private final SpriteBatch batch; // SpriteBatch to draw the background
 
     public VictoryScreen(MazeRunnerGame game) {
         this.game = game;
         stage = new Stage(new ScreenViewport(), game.getSpriteBatch());
-        batch = new SpriteBatch(); // Initialize SpriteBatch for drawing the background
-        backgroundTexture = new Texture(Gdx.files.internal("assets/pixelart.png")); // Load the background image
-
         Gdx.input.setInputProcessor(stage); // Set stage as input processor
 
         Table table = new Table();
@@ -63,13 +58,6 @@ public class VictoryScreen implements Screen {
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        // Draw the background image
-        batch.begin();
-        batch.draw(backgroundTexture, 0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()); // Draw the background
-        batch.end();
-
-        // Update and draw the stage (UI elements)
         stage.act(delta);
         stage.draw();
     }
@@ -81,9 +69,6 @@ public class VictoryScreen implements Screen {
 
     @Override
     public void dispose() {
-        // Dispose resources
-        backgroundTexture.dispose();
-        batch.dispose();
         stage.dispose();
     }
 

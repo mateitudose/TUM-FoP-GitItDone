@@ -1,7 +1,6 @@
 package de.tum.cit.fop.maze;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -13,7 +12,7 @@ import java.util.*;
 
 public class MazeMap {
     private final TextureRegion[][] carpetTiles, wallTiles, furnitureTiles, thingTiles, objectTiles, grassTiles;
-    private final TextureRegion tree1Texture, tree2Texture, heartTexture, entryTexture, exitTexture, trapTexture, enemyTexture, keyTexture, pathTexture, grassTexture, wallHorTexture, wallVerTexture, cornerRUTexture, cornerRDTexture, cornerLUTexture, cornerLDTexture;
+    private final TextureRegion tree1Texture, tree2Texture, entryTexture, exitTexture, trapTexture, enemyTexture, keyTexture, pathTexture, grassTexture, wallHorTexture, wallVerTexture, cornerRUTexture, cornerRDTexture, cornerLUTexture, cornerLDTexture;
     private final Map<String, List<GameObject>> gameObjects = new HashMap<>();
     private final List<ExitPoint> exitPoints = new ArrayList<>();
     private final List<LaserTrap> laserTraps = new ArrayList<>();
@@ -22,8 +21,6 @@ public class MazeMap {
     private final World world;
     public int entryX, entryY;
     public static final int TILE_SIZE = 16;
-    private List<String> paths;
-    private Heart heart;
 
     public enum WallType {
         HORIZONTAL, VERTICAL, CORNER_LU, CORNER_RU, CORNER_LD, CORNER_RD
@@ -38,14 +35,12 @@ public class MazeMap {
         objectTiles = splitRegion(atlas.findRegion("objects"), TILE_SIZE, TILE_SIZE);
         grassTiles = splitRegion(atlas.findRegion("basictiles"), TILE_SIZE, TILE_SIZE);
         this.world = world;
-        paths = new ArrayList<>();
 
         entryTexture = carpetTiles[6][2];
         exitTexture = carpetTiles[12][2];
         trapTexture = thingTiles[6][0];
         enemyTexture = thingTiles[3][11];
         keyTexture = thingTiles[0][7];
-        heartTexture = new TextureRegion(new Texture("world.png"),0,0,60,60);
         pathTexture = carpetTiles[2][2];
         grassTexture = grassTiles[8][0];
         tree1Texture = grassTiles[3][6];
@@ -90,9 +85,6 @@ public class MazeMap {
 
             mazeWidth = maxX + 1;
             mazeHeight = maxY + 1;
-
-
-
 
             boolean hasEntry = false, hasExit = false;
             for (int y = 0; y < mazeHeight; y++) {
@@ -183,13 +175,9 @@ public class MazeMap {
                         }
                     } else {
                         addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
-                        paths.add(key);
-
                     }
                 }
             }
-
-
 
             if (!hasEntry) throw new IllegalStateException("No entry point defined in the maze file!");
             if (!hasExit) throw new IllegalStateException("No exit point defined in the maze file!");
@@ -210,18 +198,6 @@ public class MazeMap {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-    public Heart randomKey() {
-        if(heart != null) return heart;
-        if (paths.isEmpty()) return null;
-        Random rand = new Random();
-        String key = paths.get(rand.nextInt(paths.size()));
-        String[] coords = key.split(",");
-        int x = Integer.parseInt(coords[0]);
-        int y = Integer.parseInt(coords[1]);
-
-        heart = new Heart(x, y, TILE_SIZE, heartTexture);
-        return heart;
     }
 
     private void addGameObject(String key, GameObject object) {
@@ -334,8 +310,6 @@ public class MazeMap {
                 object.render(batch);
             }
         }
-        heart.update(Gdx.graphics.getDeltaTime());
-        heart.render(batch);
     }
 
     public Map<String, List<GameObject>> getGameObjects() {
