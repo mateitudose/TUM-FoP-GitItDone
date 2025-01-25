@@ -13,7 +13,7 @@ import de.tum.cit.fop.maze.MazeMap;
 
 public class Player extends GameEntity {
     private static final float MOVE_SPEED = 2.0f;
-    public static final int PLAYER_LIVES = 3;
+    public static final int PLAYER_LIVES = 4;
     private float speed;
     private World world;
     private Animation<TextureRegion> downAnim, upAnim, rightAnim, leftAnim;
@@ -73,7 +73,7 @@ public class Player extends GameEntity {
         fixtureDef.density = 1.0f;
         fixtureDef.friction = 0.0f;
         fixtureDef.filter.categoryBits = 0x0001;
-        fixtureDef.filter.maskBits = 0x0002 | 0x0004 | 0x0008; // Collide with walls, fish, and slow tiles
+        fixtureDef.filter.maskBits = 0x0002 | 0x0004 | 0x0008 | 0x0010; // Collide with walls, fish, slow tiles and hearts
 
         Fixture fixture = body.createFixture(fixtureDef);
         fixture.setSensor(true);
@@ -191,6 +191,16 @@ public class Player extends GameEntity {
     public void applySlowEffect(float duration) {
         this.speed = MOVE_SPEED / 3f;
         this.slowTimer = duration;
+    }
+
+    public boolean canGainLife() {
+        return lives < PLAYER_LIVES;
+    }
+
+    public void addLife() {
+        if (canGainLife()) {
+            lives++;
+        }
     }
 
     public float getMovementSpeed() {

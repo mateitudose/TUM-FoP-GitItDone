@@ -48,6 +48,7 @@ public class GameScreen implements Screen {
 
     private Set<LaserTrap> activeContactTraps = new HashSet<>();
     private final Set<Fish> fishToCollect = new HashSet<>();
+    private final Set<Heart> heartsToCollect = new HashSet<>();
 
     private HUD hud;
     private final Vector2 playerPosition = new Vector2();
@@ -78,6 +79,7 @@ public class GameScreen implements Screen {
                 handleTrapContact(contact, true);
                 handleFishContact(contact, true);
                 handleSlowTileContact(contact, true);
+                handleHeartContact(contact, true);
             }
 
             @Override
@@ -142,6 +144,22 @@ public class GameScreen implements Screen {
 
                     if (isBegin) {
                         player.applySlowEffect(5);
+                    }
+                }
+            }
+
+            private void handleHeartContact(Contact contact, boolean isBegin) {
+                Fixture fixtureA = contact.getFixtureA();
+                Fixture fixtureB = contact.getFixtureB();
+
+                Object userDataA = fixtureA.getBody().getUserData();
+                Object userDataB = fixtureB.getBody().getUserData();
+
+                if ((userDataA instanceof Player && userDataB instanceof Heart) ||
+                        (userDataB instanceof Player && userDataA instanceof Heart)) {
+                    Heart heart = (userDataA instanceof Heart) ? (Heart) userDataA : (Heart) userDataB;
+                    if (isBegin) {
+                        heartsToCollect.add(heart);
                     }
                 }
             }
@@ -210,12 +228,24 @@ public class GameScreen implements Screen {
         for (Fish fish : fishToCollect) {
             mazeMap.removeGameObject(fish);
             if (fish.getBody() != null) {
+                mazeMap.removeGameObject(fish);
                 gameWorld.destroyBody(fish.getBody());
             }
             player.collectFish();
         }
         fishToCollect.clear();
 
+        // Process collected hearts
+        for (Heart heart : heartsToCollect) {
+            if (player.canGainLife()) {
+                player.addLife();
+                mazeMap.removeGameObject(heart);
+                heart.collect();
+            }
+        }
+        heartsToCollect.clear();
+
+        // Disable exit points if player has collected 1 fish
         if (player.getCollectedFish() == 1) {
             for (ExitPoint exit : mazeMap.getExitPoints()) {
                 exit.disableCollision();
@@ -229,15 +259,13 @@ public class GameScreen implements Screen {
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        for (List<GameObject> objectList : mazeMap.getGameObjects().values()) {
-            for (GameObject object : objectList) {
-                object.render(batch);
-            }
-        }
+        mazeMap.render(batch);
         player.render(batch);
+
         // Switch to screen coordinates for HUD rendering
         batch.setProjectionMatrix(new Matrix4().setToOrtho2D(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight()));
         hud.render(batch, playerPosition);
+
         batch.end();
 
         rayHandler.setCombinedMatrix(camera);

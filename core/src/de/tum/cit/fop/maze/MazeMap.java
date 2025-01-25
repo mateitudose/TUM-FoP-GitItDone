@@ -171,6 +171,11 @@ public class MazeMap {
                                     SlowTile slowTile = new SlowTile(x, y, world);
                                     addGameObject(key, slowTile);
                                 }
+                                case 7 -> {
+                                    Heart heart = new Heart(x, y, world);
+                                    addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
+                                    addGameObject(key, heart);
+                                }
                             }
                         }
                     } else {
