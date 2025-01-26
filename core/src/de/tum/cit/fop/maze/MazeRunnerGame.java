@@ -21,6 +21,7 @@ public class MazeRunnerGame extends Game {
     private GameOverScreen gameOverScreen;
     private VictoryScreen victoryScreen;
     private PauseMenuScreen pauseMenuScreen;
+    private float mazeMusicPosition;
 
     // Sprite Batch for rendering
     private SpriteBatch spriteBatch;
@@ -31,6 +32,7 @@ public class MazeRunnerGame extends Game {
     // Background Music
     private Music backgroundMusic;
     private Music mazeMusic;
+    private Music abilityMusic;
 
     /**
      * Constructor for MazeRunnerGame.
@@ -56,6 +58,10 @@ public class MazeRunnerGame extends Game {
         // Initialize the maze music
         mazeMusic = Gdx.audio.newMusic(Gdx.files.internal("mazeMusic.mp3"));
         mazeMusic.setLooping(true);
+
+        // Initialize the ability music
+        abilityMusic = Gdx.audio.newMusic(Gdx.files.internal("superability_audio.mp3"));
+        abilityMusic.setLooping(false);
 
         goToMenu();
     }
@@ -130,7 +136,7 @@ public class MazeRunnerGame extends Game {
         }
     }
 
-    private void stopMazeMusic() {
+    public void stopMazeMusic() {
         if (mazeMusic.isPlaying()) {
             mazeMusic.stop();
         }
@@ -141,6 +147,32 @@ public class MazeRunnerGame extends Game {
         stopMazeMusic();
     }
 
+    public void pauseMazeMusic() {
+        if (mazeMusic.isPlaying()) {
+            mazeMusicPosition = mazeMusic.getPosition();
+            mazeMusic.pause();
+        }
+    }
+
+    public void resumeMazeMusic() {
+        if (!mazeMusic.isPlaying()) {
+            mazeMusic.setPosition(mazeMusicPosition);
+            mazeMusic.play();
+        }
+    }
+
+    public void playAbilityMusic() {
+        if (!abilityMusic.isPlaying()) {
+            abilityMusic.play();
+        }
+    }
+
+    public void stopAbilityMusic() {
+        if (abilityMusic.isPlaying()) {
+            abilityMusic.stop();
+        }
+    }
+
     @Override
     public void dispose() {
         // Dispose of global resources
@@ -149,6 +181,9 @@ public class MazeRunnerGame extends Game {
         }
         if (mazeMusic != null) {
             mazeMusic.dispose();
+        }
+        if (abilityMusic != null) {
+            abilityMusic.dispose();
         }
         if (spriteBatch != null) spriteBatch.dispose();
         if (skin != null) skin.dispose();

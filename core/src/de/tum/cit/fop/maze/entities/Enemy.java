@@ -1,6 +1,7 @@
 package de.tum.cit.fop.maze.entities;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -44,6 +45,9 @@ public class Enemy extends GameEntity {
     private Random random = new Random();
     private float randomMoveTimer = 0f;
     private Vector2 randomDirection = new Vector2();
+
+    private boolean dizzy = false;
+    private float dizzyTimer = 0f;
 
     /**
      * Constructs an Enemy object.
@@ -110,6 +114,16 @@ public class Enemy extends GameEntity {
         // Guard clause to prevent null errors until player is set
         if (player == null)
             return;
+
+        if (dizzy) {
+            dizzyTimer -= delta;
+            if (dizzyTimer <= 0) {
+                dizzy = false;
+                sprite.setColor(Color.WHITE);
+            }
+            // Don't move while dizzy
+            return;
+        }
 
         stateTime += delta;
 
@@ -259,6 +273,16 @@ public class Enemy extends GameEntity {
             }
         }
         randomDirection.setZero(); // Stop if no valid direction
+    }
+    public void dizziness(float duration) {
+        this.dizzy = true;
+        this.dizzyTimer = duration;
+        this.body.setLinearVelocity(0, 0);
+        this.sprite.setColor(0.7f, 0.7f, 0.7f, 1); // Gray out
+    }
+
+    public boolean isDizzy() {
+        return dizzy;
     }
 
     /**

@@ -46,6 +46,7 @@ public class GameScreen implements Screen {
     private RayHandler rayHandler;
     private Box2DDebugRenderer debugRenderer;
     private Algorithm pathfinder;
+    private boolean wasAbilityActive = false;
 
     private int lastWidth = -1;
     private int lastHeight = -1;
@@ -54,6 +55,7 @@ public class GameScreen implements Screen {
     private Set<LaserTrap> activeContactTraps = new HashSet<>();
     private final Set<Fish> fishToCollect = new HashSet<>();
     private final Set<Heart> heartsToCollect = new HashSet<>();
+    private final Set<Ability> abilityToCollect = new HashSet<>();
 
     private HUD hud;
     private final Vector2 playerPosition = new Vector2();
@@ -94,6 +96,7 @@ public class GameScreen implements Screen {
                 handleSlowTileContact(contact, true);
                 handleHeartContact(contact, true);
                 handleEnemyContact(contact, true);
+                handleAbilityContact(contact, true);
             }
 
             @Override
@@ -204,6 +207,22 @@ public class GameScreen implements Screen {
                 }
             }
 
+            private void handleAbilityContact(Contact contact, boolean isBegin) {
+                Fixture fixtureA = contact.getFixtureA();
+                Fixture fixtureB = contact.getFixtureB();
+
+                Object userDataA = fixtureA.getBody().getUserData();
+                Object userDataB = fixtureB.getBody().getUserData();
+
+                if ((userDataA instanceof Player && userDataB instanceof Ability) ||
+                        (userDataB instanceof Player && userDataA instanceof Ability)) {
+                    Ability ability = (userDataA instanceof Ability) ? (Ability) userDataA : (Ability) userDataB;
+                    if (isBegin) {
+                        abilityToCollect.add(ability);
+                    }
+                }
+            }
+
             /**
              * Handles contact with enemies.
              *
@@ -219,8 +238,8 @@ public class GameScreen implements Screen {
 
                 if ((userDataA instanceof Player && userDataB instanceof Enemy) ||
                         (userDataB instanceof Player && userDataA instanceof Enemy)) {
-
-                    if (isBegin && player.canTakeDamage()) {
+                    Enemy enemy = (userDataA instanceof Enemy) ? (Enemy) userDataA : (Enemy) userDataB;
+                    if (isBegin && !enemy.isDizzy() && player.canTakeDamage()) {
                         player.loseLives(1);
                     }
                 }
@@ -318,6 +337,27 @@ public class GameScreen implements Screen {
             }
         }
         heartsToCollect.clear();
+
+        // Process collected abilities
+        for (Ability ability : abilityToCollect) {
+            player.startAbility();
+            game.pauseMazeMusic();
+            game.playAbilityMusic();
+            // Stun all enemies
+            for (Enemy enemy : mazeMap.getEnemies()) {
+                enemy.dizziness(6f);
+            }
+            mazeMap.removeGameObject(ability);
+            ability.collect();
+        }
+        abilityToCollect.clear();
+
+        // Check if ability just deactivated (every frame)
+        if (wasAbilityActive && !player.isAbilityActive()) {
+            game.stopAbilityMusic();
+            game.resumeMazeMusic();
+        }
+        wasAbilityActive = player.isAbilityActive();
 
         // Disable exit points if player has collected 1 fish
         if (player.getCollectedFish() == 1) {

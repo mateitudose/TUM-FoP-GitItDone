@@ -20,7 +20,7 @@ public class Player extends GameEntity {
     public static final int PLAYER_LIVES = 4;
     private float speed;
     private World world;
-    private Animation<TextureRegion> downAnim, upAnim, rightAnim, leftAnim;
+    private Animation<TextureRegion> downAnim, upAnim, rightAnim, leftAnim, rotatingAnim;
     private MazeMap mazeMap;
     private float stateTime = 0f;
     private String currentDirection = "down";
@@ -34,6 +34,9 @@ public class Player extends GameEntity {
     private final Color damageColor = new Color(1, 0.3f, 0.3f, 1); // Red tint color
     private float contactTimer = 0f;
     private static final float CONTACT_DAMAGE_INTERVAL = 1.0f;
+
+    private float abilityActiveTimer = 0f;
+    private boolean abilityActive = false;
 
     /**
      * Constructs a new Player.
@@ -64,6 +67,7 @@ public class Player extends GameEntity {
         Array<TextureRegion> rightFrames = new Array<>(frames);
         Array<TextureRegion> upFrames = new Array<>(frames);
         Array<TextureRegion> leftFrames = new Array<>(frames);
+        Array<TextureRegion> rotatingFrames = new Array<>(frames + 2);
 
         for (int col = 0; col < frames; col++) {
             downFrames.add(new TextureRegion(characterSheet, (12 + col) * frameWidth, frameHeight, frameWidth, frameHeight));
@@ -72,10 +76,18 @@ public class Player extends GameEntity {
             leftFrames.add(new TextureRegion(characterSheet, (12 + col) * frameWidth, 5 * frameHeight, frameWidth, frameHeight));
         }
 
+        rotatingFrames.add(new TextureRegion(characterSheet, 11 * frameWidth, 16 * frameHeight, frameWidth, frameHeight));
+        rotatingFrames.add(new TextureRegion(characterSheet, 11 * frameWidth, 14 * frameHeight, frameWidth, frameHeight));
+        rotatingFrames.add(new TextureRegion(characterSheet, 11 * frameWidth, 12 * frameHeight, frameWidth, frameHeight));
+        rotatingFrames.add(new TextureRegion(characterSheet, 11 * frameWidth, 8 * frameHeight, frameWidth, frameHeight));
+        rotatingFrames.add(new TextureRegion(characterSheet, 11 * frameWidth, 6 * frameHeight, frameWidth, frameHeight));
+        rotatingFrames.add(new TextureRegion(characterSheet, 11 * frameWidth, 4 * frameHeight, frameWidth, frameHeight));
+
         downAnim = new Animation<>(0.1f, downFrames);
         rightAnim = new Animation<>(0.1f, rightFrames);
         upAnim = new Animation<>(0.1f, upFrames);
         leftAnim = new Animation<>(0.1f, leftFrames);
+        rotatingAnim = new Animation<>(0.05f, rotatingFrames);
     }
 
     /**
@@ -99,7 +111,7 @@ public class Player extends GameEntity {
         fixtureDef.density = 1.0f;
         fixtureDef.friction = 0.0f;
         fixtureDef.filter.categoryBits = 0x0001;
-        fixtureDef.filter.maskBits = 0x0002 | 0x0004 | 0x0008 | 0x0010 | 0x0009; // Collide with walls, fish, slow tiles, hearts and enemies
+        fixtureDef.filter.maskBits = 0x0002 | 0x0004 | 0x0008 | 0x0010 | 0x0009 | 0x0011; // Collide with walls, fish, slow tiles, hearts, ability and enemies
 
         Fixture fixture = body.createFixture(fixtureDef);
         fixture.setSensor(true);
@@ -121,6 +133,13 @@ public class Player extends GameEntity {
     @Override
     public void update(float delta) {
         stateTime += delta;
+
+        if (abilityActive) {
+            abilityActiveTimer -= delta;
+            if (abilityActiveTimer <= 0) {
+                abilityActive = false;
+            }
+        }
 
         if (damageEffectTimer > 0) {
             damageEffectTimer = Math.max(0, damageEffectTimer - delta);
@@ -218,19 +237,23 @@ public class Player extends GameEntity {
      * Updates the player's animation based on the current direction and movement state.
      */
     private void updateAnimation() {
-        Animation<TextureRegion> currentAnimation = switch (currentDirection) {
-            case "up" -> upAnim;
-            case "right" -> rightAnim;
-            case "left" -> leftAnim;
-            default -> downAnim;
-        };
-
-        if (isMoving) {
-            sprite.setRegion(currentAnimation.getKeyFrame(stateTime, true));
+        if (abilityActive) {
+            sprite.setRegion(rotatingAnim.getKeyFrame(stateTime, true));
         } else {
-            // When stopping, use the first frame of the current direction's animation
-            sprite.setRegion(currentAnimation.getKeyFrame(0));
-            stateTime = 0;
+            Animation<TextureRegion> currentAnimation = switch (currentDirection) {
+                case "up" -> upAnim;
+                case "right" -> rightAnim;
+                case "left" -> leftAnim;
+                default -> downAnim;
+            };
+
+            if (isMoving) {
+                sprite.setRegion(currentAnimation.getKeyFrame(stateTime, true));
+            } else {
+                // When stopping, use the first frame of the current direction's animation
+                sprite.setRegion(currentAnimation.getKeyFrame(0));
+                stateTime = 0;
+            }
         }
     }
 
@@ -337,4 +360,12 @@ public class Player extends GameEntity {
         return damageEffectTimer <= 0;
     }
 
+    public void startAbility() {
+        abilityActive = true;
+        abilityActiveTimer = 6f;
+    }
+
+    public boolean isAbilityActive() {
+        return abilityActive;
+    }
 }

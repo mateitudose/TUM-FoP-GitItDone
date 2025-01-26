@@ -167,6 +167,11 @@ public class MazeMap {
                                     addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
                                     addGameObject(key, heart);
                                 }
+                                case 8 -> {
+                                    Ability ability = new Ability(x, y, world);
+                                    addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
+                                    addGameObject(key, ability);
+                                }
                             }
                         }
                     } else {
