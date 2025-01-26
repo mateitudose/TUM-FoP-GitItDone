@@ -3,6 +3,7 @@ package de.tum.cit.fop.maze.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Matrix4;
@@ -33,6 +34,11 @@ public class GameScreen implements Screen {
     private static final float CAMERA_ZOOM_SPEED = 0.01f;
     private static final float MIN_ZOOM = 0.15f;
     private static final float MAX_ZOOM = 0.3f;
+
+    private Sound fishSound;
+    private Sound slowTileSound;
+    private Sound enemySound;
+    private Sound laserSound;
 
     private final MazeRunnerGame game;
     private OrthographicCamera camera;
@@ -71,6 +77,11 @@ public class GameScreen implements Screen {
         this.mapPath = mapPath;
         // Uncomment the following line to enable debug rendering of colliders
 //        debugRenderer = new Box2DDebugRenderer();
+
+        fishSound = Gdx.audio.newSound(Gdx.files.internal("assets/chewing.mp3"));
+        slowTileSound = Gdx.audio.newSound(Gdx.files.internal("assets/slowmo.mp3"));
+        enemySound = Gdx.audio.newSound(Gdx.files.internal("assets/meow.mp3"));
+        laserSound = Gdx.audio.newSound(Gdx.files.internal("assets/laser.mp3"));
     }
 
     @Override
@@ -134,6 +145,7 @@ public class GameScreen implements Screen {
                         activeContactTraps.add(trap);
                         if (trap.isDangerous()) {
                             player.loseLives(1);
+                            laserSound.play();
                         }
                     } else {
                         activeContactTraps.remove(trap);
@@ -181,6 +193,7 @@ public class GameScreen implements Screen {
 
                     if (isBegin) {
                         player.applySlowEffect(5);
+                        slowTileSound.play();
                     }
                 }
             }
@@ -247,6 +260,7 @@ public class GameScreen implements Screen {
                     Enemy enemy = (userDataA instanceof Enemy) ? (Enemy) userDataA : (Enemy) userDataB;
                     if (isBegin && !enemy.isDizzy() && player.canTakeDamage()) {
                         player.loseLives(1);
+                        enemySound.play();
                     }
                 }
             }
@@ -331,6 +345,7 @@ public class GameScreen implements Screen {
             mazeMap.removeGameObject(fish);
             fish.destroyBody();
             player.collectFish();
+            fishSound.play();
         }
         fishToCollect.clear();
 
