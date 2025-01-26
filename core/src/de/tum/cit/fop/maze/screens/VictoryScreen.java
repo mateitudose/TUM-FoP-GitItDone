@@ -20,10 +20,15 @@ public class VictoryScreen implements Screen {
     private final MazeRunnerGame game;
     private final Stage stage;
 
+    /**
+     * Constructs a new VictoryScreen object.
+     *
+     * @param game the main game class
+     */
     public VictoryScreen(MazeRunnerGame game) {
         this.game = game;
         stage = new Stage(new ScreenViewport(), game.getSpriteBatch());
-        Gdx.input.setInputProcessor(stage); // Set stage as input processor
+        Gdx.input.setInputProcessor(stage);
 
         Table table = new Table();
         table.setFillParent(true);
@@ -55,6 +60,11 @@ public class VictoryScreen implements Screen {
         });
     }
 
+    /**
+     * Renders the victory screen.
+     *
+     * @param delta the time in seconds since the last render
+     */
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -62,6 +72,12 @@ public class VictoryScreen implements Screen {
         stage.draw();
     }
 
+    /**
+     * Resizes the victory screen.
+     *
+     * @param width  the new width
+     * @param height the new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
@@ -78,11 +94,14 @@ public class VictoryScreen implements Screen {
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+    }
 
     @Override
-    public void resume() {}
+    public void resume() {
+    }
 
     @Override
-    public void hide() {}
+    public void hide() {
+    }
 }

@@ -5,11 +5,20 @@ import com.badlogic.gdx.physics.box2d.*;
 import de.tum.cit.fop.maze.MazeMap;
 
 /**
- * Represents a wall in the maze.
+ * Represents a wall tile in the maze.
  */
 public class Wall extends GameObject {
     private World world;
 
+    /**
+     * Constructs a new Wall object.
+     *
+     * @param x        the x-coordinate in tile coordinates
+     * @param y        the y-coordinate in tile coordinates
+     * @param tileSize the size of the tile
+     * @param texture  the texture region for the wall
+     * @param world    the Box2D world the wall belongs to
+     */
     public Wall(int x, int y, int tileSize, TextureRegion texture, World world) {
         super(x, y, tileSize, tileSize, texture);
         this.world = world;

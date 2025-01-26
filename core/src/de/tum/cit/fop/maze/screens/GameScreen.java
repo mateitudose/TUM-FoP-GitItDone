@@ -26,7 +26,9 @@ import de.tum.cit.fop.maze.pathfinding.Algorithm;
 import java.util.HashSet;
 import java.util.Set;
 
-
+/**
+ * Represents the main game screen where the game is played.
+ */
 public class GameScreen implements Screen {
     private static final float CAMERA_ZOOM_SPEED = 0.01f;
     private static final float MIN_ZOOM = 0.15f;
@@ -56,14 +58,22 @@ public class GameScreen implements Screen {
     private HUD hud;
     private final Vector2 playerPosition = new Vector2();
 
+    /**
+     * Constructs a new GameScreen object.
+     *
+     * @param game    the main game class
+     * @param mapPath the path to the map file
+     */
     public GameScreen(MazeRunnerGame game, String mapPath) {
         this.game = game;
         this.mapPath = mapPath;
-        debugRenderer = new Box2DDebugRenderer();
+        // Uncomment the following line to enable debug rendering of colliders
+//        debugRenderer = new Box2DDebugRenderer();
     }
 
     @Override
     public void show() {
+        // Stop reinitializing the game world if it already exists (e.g. when resuming from pause)
         if (gameWorld != null) {
             return;
         }
@@ -101,6 +111,12 @@ public class GameScreen implements Screen {
 
             }
 
+            /**
+             * Handles contact with laser traps.
+             *
+             * @param contact the contact object
+             * @param isBegin true if the contact is beginning, false if ending
+             */
             private void handleTrapContact(Contact contact, boolean isBegin) {
                 Fixture fixtureA = contact.getFixtureA();
                 Fixture fixtureB = contact.getFixtureB();
@@ -122,6 +138,12 @@ public class GameScreen implements Screen {
                 }
             }
 
+            /**
+             * Handles contact with fish.
+             *
+             * @param contact the contact object
+             * @param isBegin true if the contact is beginning, false if ending
+             */
             private void handleFishContact(Contact contact, boolean isBegin) {
                 Fixture fixtureA = contact.getFixtureA();
                 Fixture fixtureB = contact.getFixtureB();
@@ -138,6 +160,12 @@ public class GameScreen implements Screen {
                 }
             }
 
+            /**
+             * Handles contact with slow tiles.
+             *
+             * @param contact the contact object
+             * @param isBegin true if the contact is beginning, false if ending
+             */
             private void handleSlowTileContact(Contact contact, boolean isBegin) {
                 Fixture fixtureA = contact.getFixtureA();
                 Fixture fixtureB = contact.getFixtureB();
@@ -154,6 +182,12 @@ public class GameScreen implements Screen {
                 }
             }
 
+            /**
+             * Handles contact with hearts.
+             *
+             * @param contact the contact object
+             * @param isBegin true if the contact is beginning, false if ending
+             */
             private void handleHeartContact(Contact contact, boolean isBegin) {
                 Fixture fixtureA = contact.getFixtureA();
                 Fixture fixtureB = contact.getFixtureB();
@@ -170,6 +204,12 @@ public class GameScreen implements Screen {
                 }
             }
 
+            /**
+             * Handles contact with enemies.
+             *
+             * @param contact the contact object
+             * @param isBegin true if the contact is beginning, false if ending
+             */
             private void handleEnemyContact(Contact contact, boolean isBegin) {
                 Fixture fixtureA = contact.getFixtureA();
                 Fixture fixtureB = contact.getFixtureB();
@@ -222,6 +262,11 @@ public class GameScreen implements Screen {
         hud = new HUD(player, mazeMap);
     }
 
+    /**
+     * Finds the entry point of the maze.
+     *
+     * @return the entry point as a Vector2
+     */
     private Vector2 findEntryPoint() {
         return new Vector2(mazeMap.entryX, mazeMap.entryY);
     }
@@ -245,6 +290,7 @@ public class GameScreen implements Screen {
             laserTrap.update(delta);
         }
 
+        // Update the animations of the enemies
         for (Enemy enemy : mazeMap.getEnemies()) {
             enemy.update(delta);
         }
@@ -258,10 +304,7 @@ public class GameScreen implements Screen {
         // Process collected fish
         for (Fish fish : fishToCollect) {
             mazeMap.removeGameObject(fish);
-            if (fish.getBody() != null) {
-                mazeMap.removeGameObject(fish);
-                gameWorld.destroyBody(fish.getBody());
-            }
+            fish.destroyBody();
             player.collectFish();
         }
         fishToCollect.clear();
@@ -306,16 +349,19 @@ public class GameScreen implements Screen {
         rayHandler.setCombinedMatrix(camera);
         rayHandler.updateAndRender();
 
-        // Debug rendering of all colliders
-        Matrix4 scaledMatrix = new Matrix4(camera.combined);
-        scaledMatrix.scale(16f, 16f, 16f);
-
-        debugRenderer.render(gameWorld, scaledMatrix);
+        // Debug rendering of all colliders, uncomment to enable
+//        Matrix4 scaledMatrix = new Matrix4(camera.combined);
+//        scaledMatrix.scale(16f, 16f, 16f);
+//
+//        debugRenderer.render(gameWorld, scaledMatrix);
 
         // Update Box2D world
         gameWorld.step(1 / 60f, 6, 2);
     }
 
+    /**
+     * Updates the camera position and zoom based on player position and input.
+     */
     private void updateCamera() {
         Vector2 playerPosition = player.getBody().getPosition();
         // Smooth interpolation
@@ -332,6 +378,9 @@ public class GameScreen implements Screen {
         camera.update();
     }
 
+    /**
+     * Checks the game status to determine if the player has won or lost.
+     */
     private void checkGameStatus() {
         // Check for game over first
         if (player.getLives() <= 0) {
@@ -347,6 +396,9 @@ public class GameScreen implements Screen {
         }
     }
 
+    /**
+     * Toggles the pause state of the game.
+     */
     private void togglePause() {
         isPaused = !isPaused;
 
@@ -386,7 +438,6 @@ public class GameScreen implements Screen {
     public void hide() {
     }
 
-    // TODO: Dispose of all resources
     @Override
     public void dispose() {
     }

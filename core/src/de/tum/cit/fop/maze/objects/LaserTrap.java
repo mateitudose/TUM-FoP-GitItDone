@@ -1,11 +1,15 @@
 package de.tum.cit.fop.maze.objects;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.physics.box2d.*;
 
+/**
+ * Represents a LaserTrap object in the maze game.
+ * The LaserTrap object can activate and deactivate, becoming dangerous when active.
+ */
 public class LaserTrap extends GameObject {
     private static final float ANIMATION_SPEED = 0.1f;
     private static final int ACTIVATING_FRAMES = 3;
@@ -23,23 +27,35 @@ public class LaserTrap extends GameObject {
     private boolean wasDangerous = false;
     private boolean previousDangerous = false;
 
-    private long activeDuration = 5000; // Active time in milliseconds
-    private long inactiveDuration = 3000; // Inactive time in milliseconds
+    private long activeDuration = 5000;
+    private long inactiveDuration = 3000;
 
     private long elapsedTimeActive = 0;
     private long elapsedTimeInactive = 0;
     private long lastUpdateTime = 0;
 
     private boolean isPaused = false;
+    private Body body;
 
-    public LaserTrap(int x, int y) {
+    /**
+     * Constructs a new LaserTrap object.
+     *
+     * @param x     the x-coordinate in tile coordinates
+     * @param y     the y-coordinate in tile coordinates
+     * @param world the Box2D world in which the laser trap exists
+     */
+    public LaserTrap(int x, int y, World world) {
         super(x, y, 8, 16, new TextureRegion(new Texture("laser.png"), 32, 0, 32, 64));
         sprite.setPosition(x * TILE_SIZE + 3, y * TILE_SIZE);
+        createBody(world);
         loadAnimations();
         stateTime = 0f;
         activate();
     }
 
+    /**
+     * Loads the animations for the laser trap.
+     */
     private void loadAnimations() {
         TextureRegion[][] frames = TextureRegion.split(new Texture("laser.png"), 32, 64);
         TextureRegion[] activatingFrames = new TextureRegion[ACTIVATING_FRAMES];
@@ -65,6 +81,36 @@ public class LaserTrap extends GameObject {
         deactivatingAnimation = new Animation<>(ANIMATION_SPEED, deactivatingFrames);
     }
 
+    /**
+     * Creates the Box2D body for the laser trap.
+     *
+     * @param world the Box2D world in which the body is created
+     */
+    private void createBody(World world) {
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.StaticBody;
+        bodyDef.position.set(getX() + 0.5f, getY() + 0.5f);
+
+        body = world.createBody(bodyDef);
+        PolygonShape shape = new PolygonShape();
+        shape.setAsBox(0.3f, 0.3f);
+
+        FixtureDef fixtureDef = new FixtureDef();
+        fixtureDef.shape = shape;
+        fixtureDef.isSensor = true;
+        fixtureDef.filter.categoryBits = 0x0002;
+        fixtureDef.filter.maskBits = 0x0001;
+
+        body.createFixture(fixtureDef);
+        body.setUserData(this);
+        shape.dispose();
+    }
+
+    /**
+     * Updates the state of the laser trap.
+     *
+     * @param deltaTime the time elapsed since the last update
+     */
     public void update(float deltaTime) {
         if (isPaused) {
             lastUpdateTime = System.currentTimeMillis();
@@ -96,6 +142,11 @@ public class LaserTrap extends GameObject {
         wasDangerous = isDangerous();
     }
 
+    /**
+     * Renders the laser trap using the provided SpriteBatch.
+     *
+     * @param batch the SpriteBatch used for rendering
+     */
     @Override
     public void render(SpriteBatch batch) {
         if (isActivating) {
@@ -122,6 +173,9 @@ public class LaserTrap extends GameObject {
         sprite.draw(batch);
     }
 
+    /**
+     * Activates the laser trap.
+     */
     public void activate() {
         isActivating = true;
         isDeactivating = false;
@@ -131,6 +185,9 @@ public class LaserTrap extends GameObject {
         lastUpdateTime = System.currentTimeMillis();
     }
 
+    /**
+     * Deactivates the laser trap.
+     */
     public void deactivate() {
         isDeactivating = true;
         isActivating = false;
@@ -140,10 +197,16 @@ public class LaserTrap extends GameObject {
         lastUpdateTime = System.currentTimeMillis();
     }
 
+    /**
+     * Pauses the timer for the laser trap.
+     */
     public void pauseTimer() {
         isPaused = true;
     }
 
+    /**
+     * Resumes the timer for the laser trap.
+     */
     public void resumeTimer() {
         if (isPaused) {
             isPaused = false;
@@ -151,14 +214,20 @@ public class LaserTrap extends GameObject {
         }
     }
 
-    public boolean isActive() {
-        return isActive;
-    }
-
+    /**
+     * Checks if the laser trap is dangerous.
+     *
+     * @return true if the laser trap is dangerous, false otherwise
+     */
     public boolean isDangerous() {
         return isActive || isActivating || isDeactivating;
     }
 
+    /**
+     * Checks if the laser trap became dangerous in the current frame.
+     *
+     * @return true if the laser trap became dangerous, false otherwise
+     */
     public boolean becameDangerous() {
         return isDangerous() && !previousDangerous;
     }

@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Random;
 
 /**
- * TODO: Represents an enemy in the maze.
+ * Represents an enemy entity in the maze game.
+ * The enemy can move randomly or follow a path towards the player.
  */
 public class Enemy extends GameEntity {
     private static final float MOVE_SPEED = 1.5f; // A bit slower than the player (2f)
@@ -44,6 +45,14 @@ public class Enemy extends GameEntity {
     private float randomMoveTimer = 0f;
     private Vector2 randomDirection = new Vector2();
 
+    /**
+     * Constructs an Enemy object.
+     *
+     * @param world the Box2D world the enemy belongs to
+     * @param mazeMap the maze map the enemy navigates
+     * @param startPosition the starting position of the enemy
+     * @param pathfinder the pathfinding algorithm used by the enemy
+     */
     public Enemy(World world, MazeMap mazeMap, Vector2 startPosition, Algorithm pathfinder) {
         super((int) startPosition.x, (int) startPosition.y, 14, 14, new TextureRegion(new Texture(Gdx.files.internal("dog.png")), 12, 16, 32, 32));
         this.world = world;
@@ -57,6 +66,9 @@ public class Enemy extends GameEntity {
         this.mazeHeight = mazeMap.getMazeHeight();
     }
 
+    /**
+     * Loads the animation frames for the enemy.
+     */
     public void loadAnimation() {
         Texture enemySheet = new Texture(Gdx.files.internal("dog.png"));
 
@@ -88,6 +100,11 @@ public class Enemy extends GameEntity {
         upAnim = new Animation<>(0.1f, upFrames);
     }
 
+    /**
+     * Updates the enemy's state.
+     *
+     * @param delta the time elapsed since the last update
+     */
     @Override
     public void update(float delta) {
         // Guard clause to prevent null errors until player is set
@@ -157,14 +174,14 @@ public class Enemy extends GameEntity {
                 int tileY = (int) target.y;
                 // Skip tiles that are exits or out of bounds, so enemy doesn't accidentally go out of maze
                 if (tileX < 0 || tileX >= mazeWidth || tileY < 0 || tileY >= mazeHeight ||
-                        mazeMap.isExitorEntrance(tileX, tileY)) {
+                        mazeMap.isExitOrEntrance(tileX, tileY)) {
                     currentTileIndex++;
                 } else {
                     break;
                 }
             }
             float distance = enemyExactPosition.dst(playerExactPosition);
-            // If the enemy is too close to the player stop
+            // If the enemy is too close to the player, stop moving
             if (distance <= 0.7f) {
                 body.setLinearVelocity(0, 0);
                 delta = 0;
@@ -198,6 +215,11 @@ public class Enemy extends GameEntity {
         updateAnimation();
     }
 
+    /**
+     * Generates a random direction for the enemy to move in.
+     *
+     * @param currentPosition the current position of the enemy
+     */
     private void generateRandomDirection(Vector2 currentPosition) {
         int maxAttempts = 10;
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
@@ -227,7 +249,7 @@ public class Enemy extends GameEntity {
             }
 
             // Skip exit/entry tiles
-            if (mazeMap.isExitorEntrance(checkX, checkY)) {
+            if (mazeMap.isExitOrEntrance(checkX, checkY)) {
                 continue;
             }
 
@@ -239,6 +261,11 @@ public class Enemy extends GameEntity {
         randomDirection.setZero(); // Stop if no valid direction
     }
 
+    /**
+     * Updates the direction and animation of the enemy based on the movement direction.
+     *
+     * @param moveDirection the direction the enemy is moving in
+     */
     private void updateDirectionAndAnimation(Vector2 moveDirection) {
         if (moveDirection.len() > 0) {
             float velX = moveDirection.x;
@@ -252,12 +279,21 @@ public class Enemy extends GameEntity {
         }
     }
 
+    /**
+     * Checks if the player is within proximity of the enemy.
+     *
+     * @param enemyPosition the position of the enemy
+     * @param playerPosition the position of the player
+     * @return true if the player is within proximity, false otherwise
+     */
     private boolean isPlayerInProximity(Vector2 enemyPosition, Vector2 playerPosition) {
         float distance = enemyPosition.dst(playerPosition);
         return distance <= PROXIMITY;
     }
 
-
+    /**
+     * Updates the animation of the enemy based on the current direction.
+     */
     public void updateAnimation() {
         Animation<TextureRegion> currentAnimation = switch (currentDirection) {
             case "left" -> leftAnim;
@@ -269,6 +305,11 @@ public class Enemy extends GameEntity {
         sprite.setRegion(currentAnimation.getKeyFrame(stateTime, true));
     }
 
+    /**
+     * Renders the enemy on the screen.
+     *
+     * @param batch the SpriteBatch used for rendering
+     */
     public void render(SpriteBatch batch) {
         // Calculate the center of the tile
         float spriteX = body.getPosition().x * MazeMap.TILE_SIZE - sprite.getWidth() / 2f;
@@ -280,6 +321,12 @@ public class Enemy extends GameEntity {
         sprite.draw(batch);
     }
 
+    /**
+     * Creates the Box2D body for the enemy.
+     *
+     * @param startPosition the starting position of the enemy
+     * @return the created Box2D body
+     */
     private Body createBody(Vector2 startPosition) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -313,10 +360,20 @@ public class Enemy extends GameEntity {
         return body;
     }
 
+    /**
+     * Sets the player that the enemy will target.
+     *
+     * @param player the player to target
+     */
     public void setPlayer(Player player) {
         this.player = player;
     }
 
+    /**
+     * Sets the pathfinding algorithm for the enemy.
+     *
+     * @param pathfinder the pathfinding algorithm
+     */
     public void setPathfinder(Algorithm pathfinder) {
         this.pathfinder = pathfinder;
     }

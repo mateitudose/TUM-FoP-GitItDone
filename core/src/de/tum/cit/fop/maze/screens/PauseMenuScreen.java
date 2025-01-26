@@ -13,12 +13,21 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
+/**
+ * Represents the pause menu screen in the game.
+ */
 public class PauseMenuScreen implements Screen {
 
     private final Stage stage;
     private final MazeRunnerGame game;
-    private final GameScreen previousScreen; // Changed to GameScreen for proper handling
+    private final GameScreen previousScreen;
 
+    /**
+     * Constructs a new PauseMenuScreen object.
+     *
+     * @param game           the main game class
+     * @param previousScreen the previous game screen
+     */
     public PauseMenuScreen(MazeRunnerGame game, GameScreen previousScreen) {
         this.game = game;
         this.previousScreen = previousScreen;
@@ -73,6 +82,11 @@ public class PauseMenuScreen implements Screen {
         });
     }
 
+    /**
+     * Renders the pause menu screen.
+     *
+     * @param delta the time in seconds since the last render
+     */
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -88,6 +102,12 @@ public class PauseMenuScreen implements Screen {
         }
     }
 
+    /**
+     * Resizes the pause menu screen.
+     *
+     * @param width  the new width
+     * @param height the new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);

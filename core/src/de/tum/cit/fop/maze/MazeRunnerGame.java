@@ -30,7 +30,7 @@ public class MazeRunnerGame extends Game {
 
     // Background Music
     private Music backgroundMusic;
-    private Music mazeMusic; // Music for the maze screen
+    private Music mazeMusic;
 
     /**
      * Constructor for MazeRunnerGame.

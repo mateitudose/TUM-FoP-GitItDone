@@ -11,6 +11,10 @@ import com.badlogic.gdx.math.Vector2;
 import de.tum.cit.fop.maze.entities.Player;
 import de.tum.cit.fop.maze.objects.ExitPoint;
 
+/**
+ * Represents the HUD in the maze game.
+ * The HUD displays the player's lives, collected fish, and the direction to the nearest exit.
+ */
 public class HUD {
     private final Player player;
     private final MazeMap mazeMap;
@@ -20,6 +24,12 @@ public class HUD {
     private final TextureRegion emptyHeartTexture;
     private final Vector2 exitDirection = new Vector2();
 
+    /**
+     * Constructs a new HUD object.
+     *
+     * @param player  the player whose status is displayed
+     * @param mazeMap the maze map containing the exits
+     */
     public HUD(Player player, MazeMap mazeMap) {
         this.player = player;
         this.mazeMap = mazeMap;
@@ -33,6 +43,12 @@ public class HUD {
         this.emptyHeartTexture = heartRegions[0][8];
     }
 
+    /**
+     * Renders the HUD.
+     *
+     * @param batch          the SpriteBatch used for rendering
+     * @param playerPosition the current position of the player
+     */
     public void render(SpriteBatch batch, Vector2 playerPosition) {
         // Draw hearts for lives
         int lives = player.getLives();
@@ -64,6 +80,12 @@ public class HUD {
         }
     }
 
+    /**
+     * Finds the closest exit to the player's current position.
+     *
+     * @param playerPosition the current position of the player
+     * @return the position of the closest exit, or null if no exits are found
+     */
     private Vector2 findClosestExit(Vector2 playerPosition) {
         Vector2 closest = null;
         float minDistance = Float.MAX_VALUE;
@@ -83,6 +105,9 @@ public class HUD {
         return closest;
     }
 
+    /**
+     * Disposes of the resources used by the HUD.
+     */
     public void dispose() {
         font.dispose();
         arrowTexture.getTexture().dispose();

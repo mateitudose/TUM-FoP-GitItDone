@@ -21,6 +21,12 @@ public class GameOverScreen implements Screen {
     private final Stage stage;
     private String mapPath;
 
+    /**
+     * Constructs a new GameOverScreen object.
+     *
+     * @param game    the main game class
+     * @param mapPath the path to the map file
+     */
     public GameOverScreen(MazeRunnerGame game, String mapPath) {
         this.mapPath = mapPath;
         this.game = game;
@@ -67,6 +73,11 @@ public class GameOverScreen implements Screen {
         });
     }
 
+    /**
+     * Renders the game over screen.
+     *
+     * @param delta the time in seconds since the last render
+     */
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -74,6 +85,12 @@ public class GameOverScreen implements Screen {
         stage.draw();
     }
 
+    /**
+     * Resizes the game over screen.
+     *
+     * @param width  the new width
+     * @param height the new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
@@ -90,12 +107,14 @@ public class GameOverScreen implements Screen {
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+    }
 
     @Override
-    public void resume() {}
+    public void resume() {
+    }
 
     @Override
-    public void hide() {}
+    public void hide() {
+    }
 }
-

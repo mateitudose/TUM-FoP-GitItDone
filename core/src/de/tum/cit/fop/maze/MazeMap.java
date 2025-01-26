@@ -6,7 +6,6 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
-import com.badlogic.gdx.physics.box2d.*;
 import de.tum.cit.fop.maze.entities.Enemy;
 import de.tum.cit.fop.maze.entities.Player;
 import de.tum.cit.fop.maze.objects.*;
@@ -14,6 +13,11 @@ import de.tum.cit.fop.maze.pathfinding.Algorithm;
 
 import java.util.*;
 
+/**
+ * Represents a game maze loaded from a map file. Handles maze loading, rendering,
+ * and collision detection. Manages game objects including walls, traps, enemies,
+ * and collectibles.
+ */
 public class MazeMap {
     private final TextureRegion[][] carpetTiles, wallTiles, furnitureTiles, thingTiles, objectTiles, grassTiles;
     private final TextureRegion tree1Texture, tree2Texture, entryTexture, exitTexture, trapTexture, enemyTexture, keyTexture, pathTexture, grassTexture, wallHorTexture, wallVerTexture, cornerRUTexture, cornerRDTexture, cornerLUTexture, cornerLDTexture;
@@ -32,6 +36,14 @@ public class MazeMap {
         HORIZONTAL, VERTICAL, CORNER_LU, CORNER_RU, CORNER_LD, CORNER_RD
     }
 
+    /**
+     * Constructs a new MazeMap and loads it from the specified file
+     *
+     * @param mapPath      Path to the map properties file
+     * @param windowWidth  Window width for calculating decorative elements
+     * @param windowHeight Window height for calculating decorative elements
+     * @param world        Box2D physics world for collision bodies
+     */
     public MazeMap(String mapPath, int windowWidth, int windowHeight, World world) {
         TextureAtlas atlas = new TextureAtlas("world.atlas");
         carpetTiles = splitRegion(atlas.findRegion("carpets"), TILE_SIZE, TILE_SIZE);
@@ -62,6 +74,14 @@ public class MazeMap {
         loadMaze(mapPath, windowWidth, windowHeight);
     }
 
+    /**
+     * Splits a texture region into a grid of smaller texture regions
+     *
+     * @param region     Source texture region to split
+     * @param tileWidth  Width of each tile
+     * @param tileHeight Height of each tile
+     * @return 2D array of texture regions
+     */
     private TextureRegion[][] splitRegion(TextureRegion region, int tileWidth, int tileHeight) {
         int cols = region.getRegionWidth() / tileWidth;
         int rows = region.getRegionHeight() / tileHeight;
@@ -74,6 +94,13 @@ public class MazeMap {
         return tiles;
     }
 
+    /**
+     * Loads maze structure from a properties file
+     *
+     * @param filePath     Path to the map properties file
+     * @param windowWidth  Window width for decorative elements
+     * @param windowHeight Window height for decorative elements
+     */
     public void loadMaze(String filePath, int windowWidth, int windowHeight) {
         try {
             mapPath = filePath;
@@ -117,28 +144,7 @@ public class MazeMap {
                                     }
                                 }
                                 case 3 -> {
-                                    LaserTrap laserTrap = new LaserTrap(x, y);
-
-                                    // Physics setup
-                                    BodyDef bodyDef = new BodyDef();
-                                    bodyDef.type = BodyDef.BodyType.StaticBody;
-                                    bodyDef.position.set(x + 0.5f, y + 0.5f);
-
-                                    Body body = world.createBody(bodyDef);
-
-                                    PolygonShape shape = new PolygonShape();
-                                    shape.setAsBox(0.3f, 0.3f);
-
-                                    FixtureDef fixtureDef = new FixtureDef();
-                                    fixtureDef.shape = shape;
-                                    fixtureDef.isSensor = true;
-                                    fixtureDef.filter.categoryBits = 0x0002; // Trap category
-                                    fixtureDef.filter.maskBits = 0x0001;     // Collide with player
-
-                                    body.createFixture(fixtureDef);
-                                    body.setUserData(laserTrap);
-                                    shape.dispose();
-
+                                    LaserTrap laserTrap = new LaserTrap(x, y, world);
                                     addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
                                     addGameObject(key, laserTrap);
                                     laserTraps.add(laserTrap);
@@ -149,28 +155,7 @@ public class MazeMap {
                                 }
                                 case 5 -> {
                                     addGameObject(key, new Path(x, y, TILE_SIZE, pathTexture));
-                                    Fish fish = new Fish(x, y);
-
-                                    // Create physics body for the fish
-                                    BodyDef bodyDef = new BodyDef();
-                                    bodyDef.type = BodyDef.BodyType.StaticBody;
-                                    bodyDef.position.set(x + 0.5f, y + 0.5f); // Center in tile
-
-                                    Body body = world.createBody(bodyDef);
-                                    PolygonShape shape = new PolygonShape();
-                                    shape.setAsBox(0.25f, 0.25f); // Smaller hitbox
-
-                                    FixtureDef fixtureDef = new FixtureDef();
-                                    fixtureDef.shape = shape;
-                                    fixtureDef.isSensor = true; // No collision response
-                                    fixtureDef.filter.categoryBits = 0x0004; // Fish category
-                                    fixtureDef.filter.maskBits = 0x0001; // Collide with player
-
-                                    body.createFixture(fixtureDef);
-                                    body.setUserData(fish); // Link fish to body
-                                    fish.setBody(body); // Link body to fish
-
-                                    shape.dispose();
+                                    Fish fish = new Fish(x, y, world);
                                     addGameObject(key, fish);
                                 }
                                 case 6 -> {
@@ -211,10 +196,22 @@ public class MazeMap {
         }
     }
 
+    /**
+     * Adds a game object to the map at specified coordinates
+     *
+     * @param key    Map coordinates in "x,y" format
+     * @param object Game object to add
+     */
     private void addGameObject(String key, GameObject object) {
         gameObjects.computeIfAbsent(key, k -> new ArrayList<>()).add(object);
     }
 
+    /**
+     * Fills areas outside the main maze with grass and trees
+     *
+     * @param windowWidth  Window width for calculating fill area
+     * @param windowHeight Window height for calculating fill area
+     */
     private void fillWithGrassAndTrees(int windowWidth, int windowHeight) {
         // Calculate padding size (how far out from the maze to extend the grass)
         int padding = Math.max(50, Math.max(mazeWidth, mazeHeight));
@@ -238,6 +235,12 @@ public class MazeMap {
         }
     }
 
+    /**
+     * Performs depth-first search to generate proper wall textures
+     *
+     * @param key   Starting coordinates in "x,y" format
+     * @param props Map properties containing wall data
+     */
     private void dfsWalls(String key, Properties props) {
         Stack<String> stack = new Stack<>();
         Set<String> visited = new HashSet<>();
@@ -261,6 +264,14 @@ public class MazeMap {
         }
     }
 
+    /**
+     * Determines the appropriate wall type for a given position
+     *
+     * @param x     X coordinate of wall
+     * @param y     Y coordinate of wall
+     * @param props Map properties containing wall data
+     * @return WallType enum representing the wall configuration
+     */
     private WallType findWallType(int x, int y, Properties props) {
         boolean isUp = isWallAt(x, y + 1, props);
         boolean isDown = isWallAt(x, y - 1, props);
@@ -282,12 +293,26 @@ public class MazeMap {
         };
     }
 
+    /**
+     * Checks if there's a wall at specified coordinates
+     *
+     * @param x     X coordinate to check
+     * @param y     Y coordinate to check
+     * @param props Map properties containing wall data
+     * @return true if a wall exists at the location
+     */
     private boolean isWallAt(int x, int y, Properties props) {
         if (x < 0 || y < 0 || x >= mazeWidth || y >= mazeHeight) return false;
         String key = x + "," + y;
         return props.containsKey(key) && Integer.parseInt(props.getProperty(key)) == 0;
     }
 
+    /**
+     * Gets the appropriate texture for a wall type
+     *
+     * @param type WallType enum value
+     * @return TextureRegion for the specified wall type
+     */
     private TextureRegion getWallTexture(WallType type) {
         return switch (type) {
             case HORIZONTAL -> wallHorTexture;
@@ -299,6 +324,13 @@ public class MazeMap {
         };
     }
 
+    /**
+     * Checks if a given position is a corner of the maze
+     *
+     * @param x X coordinate to check
+     * @param y Y coordinate to check
+     * @return true if the position is a corner
+     */
     private boolean isCorner(int x, int y) {
         return (x == 0 && y == 0) || (x == 0 && y == mazeHeight - 1) || (x == mazeWidth - 1 && y == 0) || (x == mazeWidth - 1 && y == mazeHeight - 1);
     }
@@ -311,10 +343,11 @@ public class MazeMap {
         return mazeHeight;
     }
 
-    public String getMapPath() {
-        return mapPath;
-    }
-
+    /**
+     * Renders all game objects in the maze
+     *
+     * @param batch SpriteBatch used for rendering
+     */
     public void render(SpriteBatch batch) {
         for (List<GameObject> objects : gameObjects.values()) {
             for (GameObject object : objects) {
@@ -332,7 +365,14 @@ public class MazeMap {
         return object instanceof Wall;
     }
 
-    public boolean isExitorEntrance(int x, int y) {
+    /**
+     * Checks if a given position is an exit or entrance
+     *
+     * @param x X coordinate to check
+     * @param y Y coordinate to check
+     * @return true if the position is an exit or entrance
+     */
+    public boolean isExitOrEntrance(int x, int y) {
         String key = x + "," + y;
         List<GameObject> objects = gameObjects.get(key);
         if (objects != null) {
@@ -342,16 +382,35 @@ public class MazeMap {
         return false;
     }
 
+    /**
+     * Checks if a given position is walkable
+     *
+     * @param x X coordinate to check
+     * @param y Y coordinate to check
+     * @return true if the position is walkable
+     */
     public boolean isWalkable(int x, int y) {
-        return !isWall(x, y) && !isExitorEntrance(x, y);
+        return !isWall(x, y) && !isExitOrEntrance(x, y);
     }
 
+    /**
+     * Gets the game object at a given position
+     *
+     * @param x X coordinate to check
+     * @param y Y coordinate to check
+     * @return GameObject at the specified position
+     */
     private GameObject getGameObjectAt(int x, int y) {
         String key = x + "," + y;
         List<GameObject> objects = gameObjects.get(key);
         return objects != null ? objects.stream().findFirst().orElse(null) : null;
     }
 
+    /**
+     * Removes a game object from the maze
+     *
+     * @param object GameObject to remove
+     */
     public void removeGameObject(GameObject object) {
         String key = object.getX() + "," + object.getY();
         List<GameObject> objects = gameObjects.get(key);
@@ -361,6 +420,11 @@ public class MazeMap {
         }
     }
 
+    /**
+     * Gets the enemy objects in the maze
+     *
+     * @return List of Enemy objects
+     */
     public List<Enemy> getEnemies() {
         List<Enemy> enemies = new ArrayList<>();
         for (List<GameObject> objects : gameObjects.values()) {

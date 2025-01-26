@@ -11,15 +11,22 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
 
+/**
+ * Represents the screen for selecting a map in the game.
+ */
 public class MapSelectionScreen implements Screen {
-
     private final MazeRunnerGame game;
     private final Stage stage;
 
+    /**
+     * Constructs a new MapSelectionScreen object.
+     *
+     * @param game the main game class
+     */
     public MapSelectionScreen(MazeRunnerGame game) {
         this.game = game;
         stage = new Stage(new ScreenViewport(), game.getSpriteBatch());
-        Gdx.input.setInputProcessor(stage); // Set stage as input processor
+        Gdx.input.setInputProcessor(stage);
 
         Table table = new Table();
         table.setFillParent(true);
@@ -47,7 +54,6 @@ public class MapSelectionScreen implements Screen {
             });
         }
 
-        // Back button
         TextButton backButton = new TextButton("Back", game.getSkin());
         table.add(backButton).width(300).padTop(50);
         backButton.addListener(new ChangeListener() {
@@ -58,6 +64,11 @@ public class MapSelectionScreen implements Screen {
         });
     }
 
+    /**
+     * Renders the map selection screen.
+     *
+     * @param delta the time in seconds since the last render
+     */
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -65,6 +76,12 @@ public class MapSelectionScreen implements Screen {
         stage.draw();
     }
 
+    /**
+     * Resizes the map selection screen.
+     *
+     * @param width  the new width
+     * @param height the new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);
@@ -81,11 +98,14 @@ public class MapSelectionScreen implements Screen {
     }
 
     @Override
-    public void pause() {}
+    public void pause() {
+    }
 
     @Override
-    public void resume() {}
+    public void resume() {
+    }
 
     @Override
-    public void hide() {}
+    public void hide() {
+    }
 }

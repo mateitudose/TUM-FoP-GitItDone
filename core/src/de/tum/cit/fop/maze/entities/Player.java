@@ -12,6 +12,9 @@ import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import de.tum.cit.fop.maze.MazeMap;
 
+/**
+ * Represents the player entity in the maze game.
+ */
 public class Player extends GameEntity {
     private static final float MOVE_SPEED = 2.0f;
     public static final int PLAYER_LIVES = 4;
@@ -32,6 +35,13 @@ public class Player extends GameEntity {
     private float contactTimer = 0f;
     private static final float CONTACT_DAMAGE_INTERVAL = 1.0f;
 
+    /**
+     * Constructs a new Player.
+     *
+     * @param world         the Box2D world the player belongs to
+     * @param mazeMap       the maze map the player navigates
+     * @param startPosition the starting position of the player
+     */
     public Player(World world, MazeMap mazeMap, Vector2 startPosition) {
         super((int) startPosition.x, (int) startPosition.y, 20, 20, new TextureRegion(new Texture(Gdx.files.internal("cat.png")), 0, 32, 32, 32));
         this.world = world;
@@ -43,6 +53,9 @@ public class Player extends GameEntity {
         this.slowTimer = 0;
     }
 
+    /**
+     * Loads the animations for the player character.
+     */
     private void loadAnimations() {
         Texture characterSheet = new Texture(Gdx.files.internal("cat.png"));
         int frameWidth = 32, frameHeight = 32, frames = 4;
@@ -65,6 +78,12 @@ public class Player extends GameEntity {
         leftAnim = new Animation<>(0.1f, leftFrames);
     }
 
+    /**
+     * Creates the Box2D body for the player.
+     *
+     * @param startPosition the starting position of the player
+     * @return the created Box2D body
+     */
     private Body createBody(Vector2 startPosition) {
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
@@ -94,13 +113,18 @@ public class Player extends GameEntity {
         return body;
     }
 
+    /**
+     * Updates the player's state.
+     *
+     * @param delta the time elapsed since the last update
+     */
     @Override
     public void update(float delta) {
         stateTime += delta;
 
         if (damageEffectTimer > 0) {
             damageEffectTimer = Math.max(0, damageEffectTimer - delta);
-            // Calculate color interpolation
+            // Calculate color interpolation, from white to red
             float progress = damageEffectTimer / DAMAGE_EFFECT_DURATION;
             Color currentColor = new Color(Color.WHITE).lerp(damageColor, progress);
             sprite.setColor(currentColor);
@@ -112,6 +136,7 @@ public class Player extends GameEntity {
         float clampedX = Math.max(0.5f, Math.min(position.x, mazeMap.getMazeWidth() - 0.5f));
         float clampedY = Math.max(0.5f, Math.min(position.y, mazeMap.getMazeHeight() - 0.5f));
 
+        // Clamp the player's position to the maze boundaries
         if (position.x != clampedX || position.y != clampedY) {
             body.setTransform(clampedX, clampedY, body.getAngle());
         }
@@ -128,10 +153,12 @@ public class Player extends GameEntity {
         }
 
         float effectiveSpeed = speed;
+        // Double the speed if the player is holding the shift key and the slow effect is not active
         if ((Gdx.input.isKeyPressed(Input.Keys.SHIFT_LEFT) || Gdx.input.isKeyPressed(Input.Keys.SHIFT_RIGHT)) && slowTimer <= 0) {
             effectiveSpeed *= 2;
         }
 
+        // TODO: Modify the key bindings to use the arrow keys
         float velX = 0, velY = 0;
         if (Gdx.input.isKeyPressed(Input.Keys.A)) {
             velX = -effectiveSpeed;
@@ -168,6 +195,11 @@ public class Player extends GameEntity {
         updateAnimation();
     }
 
+    /**
+     * Checks if the player is in contact with an enemy.
+     *
+     * @return true if the player is in contact with an enemy, false otherwise
+     */
     private boolean isInContactWithEnemy() {
         for (Contact contact : world.getContactList()) {
             if (contact.isTouching()) {
@@ -182,6 +214,9 @@ public class Player extends GameEntity {
         return false;
     }
 
+    /**
+     * Updates the player's animation based on the current direction and movement state.
+     */
     private void updateAnimation() {
         Animation<TextureRegion> currentAnimation = switch (currentDirection) {
             case "up" -> upAnim;
@@ -199,6 +234,11 @@ public class Player extends GameEntity {
         }
     }
 
+    /**
+     * Renders the player sprite.
+     *
+     * @param batch the SpriteBatch used for drawing
+     */
     public void render(SpriteBatch batch) {
         float spriteX = body.getPosition().x * MazeMap.TILE_SIZE - sprite.getWidth() / 2f;
         float spriteY = body.getPosition().y * MazeMap.TILE_SIZE - sprite.getHeight() / 2f;
@@ -207,51 +247,94 @@ public class Player extends GameEntity {
         sprite.draw(batch);
     }
 
+    /**
+     * Reduces the player's lives by a specified amount.
+     *
+     * @param lives the number of lives to lose
+     */
     public void loseLives(int lives) {
         this.lives -= lives;
         this.damageEffectTimer = DAMAGE_EFFECT_DURATION;
     }
 
+    /**
+     * Adds a specified number of lives to the player.
+     *
+     * @param lives the number of lives to add
+     */
     public void addLives(int lives) {
         this.lives += lives;
     }
 
+    /**
+     * Gets the number of lives the player has.
+     *
+     * @return the number of lives
+     */
     public int getLives() {
         return lives;
     }
 
+    /**
+     * Checks if the player is alive.
+     *
+     * @return true if the player has more than 0 lives, false otherwise
+     */
     public boolean isAlive() {
         return lives > 0;
     }
 
+    /**
+     * Increments the number of collected fish by one.
+     */
     public void collectFish() {
         collectedFish++;
     }
 
+    /**
+     * Gets the number of collected fish.
+     *
+     * @return the number of collected fish
+     */
     public int getCollectedFish() {
         return collectedFish;
     }
 
+    /**
+     * Applies a slow effect to the player for a specified duration.
+     *
+     * @param duration the duration of the slow effect
+     */
     public void applySlowEffect(float duration) {
         this.speed = MOVE_SPEED / 3f;
         this.slowTimer = duration;
     }
 
+    /**
+     * Checks if the player can gain an additional life.
+     *
+     * @return true if the player can gain an additional life, false otherwise
+     */
     public boolean canGainLife() {
         return lives < PLAYER_LIVES;
     }
 
+    /**
+     * Adds one life to the player if possible.
+     */
     public void addLife() {
         if (canGainLife()) {
             lives++;
         }
     }
 
+    /**
+     * Checks if the player can take damage.
+     *
+     * @return true if the player can take damage, false otherwise
+     */
     public boolean canTakeDamage() {
         return damageEffectTimer <= 0;
     }
 
-    public float getMovementSpeed() {
-        return speed;
-    }
 }
