@@ -207,6 +207,12 @@ public class GameScreen implements Screen {
                 }
             }
 
+            /**
+             * Handles contact with abilities.
+             *
+             * @param contact the contact object
+             * @param isBegin true if the contact is beginning, false if ending
+             */
             private void handleAbilityContact(Contact contact, boolean isBegin) {
                 Fixture fixtureA = contact.getFixtureA();
                 Fixture fixtureB = contact.getFixtureB();

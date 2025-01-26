@@ -115,6 +115,7 @@ public class Enemy extends GameEntity {
         if (player == null)
             return;
 
+        // If the enemy is dizzy, decrement the timer
         if (dizzy) {
             dizzyTimer -= delta;
             if (dizzyTimer <= 0) {
@@ -274,6 +275,12 @@ public class Enemy extends GameEntity {
         }
         randomDirection.setZero(); // Stop if no valid direction
     }
+
+    /**
+     * Makes the enemy dizzy for a certain duration.
+     *
+     * @param duration the duration of the dizziness
+     */
     public void dizziness(float duration) {
         this.dizzy = true;
         this.dizzyTimer = duration;

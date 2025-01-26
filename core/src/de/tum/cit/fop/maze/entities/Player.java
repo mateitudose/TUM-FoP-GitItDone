@@ -134,6 +134,7 @@ public class Player extends GameEntity {
     public void update(float delta) {
         stateTime += delta;
 
+        // Check if the ability is active and update the timer
         if (abilityActive) {
             abilityActiveTimer -= delta;
             if (abilityActiveTimer <= 0) {
