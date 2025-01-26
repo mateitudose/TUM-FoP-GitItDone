@@ -1,4 +1,3 @@
-
 package de.tum.cit.fop.maze;
 
 import com.badlogic.gdx.Game;
@@ -9,10 +8,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import de.tum.cit.fop.maze.screens.*;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
-/**
- * The MazeRunnerGame class represents the core of the Maze Runner game.
- * It manages the screens and global resources like SpriteBatch and Skin.
- */
 public class MazeRunnerGame extends Game {
     // Screens
     private MenuScreen menuScreen;
@@ -33,19 +28,13 @@ public class MazeRunnerGame extends Game {
     private Music backgroundMusic;
     private Music mazeMusic;
     private Music abilityMusic;
+    private Music victoryMusic; // New Music for Victory
+    private Music gameOverMusic; // New Music for Game Over
 
-    /**
-     * Constructor for MazeRunnerGame.
-     *
-     * @param fileChooser The file chooser for the game, typically used in desktop environment.
-     */
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
     }
 
-    /**
-     * Called when the game is created. Initializes the SpriteBatch, Skin, and music.
-     */
     @Override
     public void create() {
         spriteBatch = new SpriteBatch();
@@ -62,6 +51,14 @@ public class MazeRunnerGame extends Game {
         // Initialize the ability music
         abilityMusic = Gdx.audio.newMusic(Gdx.files.internal("superability_audio.mp3"));
         abilityMusic.setLooping(false);
+
+        // Initialize victory music
+        victoryMusic = Gdx.audio.newMusic(Gdx.files.internal("gamewon.mp3"));
+        victoryMusic.setLooping(false); // Play once
+
+        // Initialize game over music
+        gameOverMusic = Gdx.audio.newMusic(Gdx.files.internal("gameover.mp3"));
+        gameOverMusic.setLooping(false); // Play once
 
         goToMenu();
     }
@@ -98,24 +95,26 @@ public class MazeRunnerGame extends Game {
         if (screen != null) {
             screen.dispose();
         }
-        // Stop all music when entering the game over screen
+        // Stop all music and play Game Over music
         stopAllMusic();
+        playGameOverMusic();
         this.setScreen(new GameOverScreen(this, mapPath));
-    }
-
-    public void goToPauseMenu(GameScreen gameScreen) {
-        // Stop all music when entering the pause menu screen
-        stopAllMusic();
-        this.setScreen(new PauseMenuScreen(this, gameScreen));
     }
 
     public void goToVictory() {
         if (screen != null) {
             screen.dispose();
         }
-        // Stop all music when entering the victory screen
+        // Stop all music and play Victory music
         stopAllMusic();
+        playVictoryMusic();
         this.setScreen(new VictoryScreen(this));
+    }
+
+    public void goToPauseMenu(GameScreen gameScreen) {
+        // Stop all music when entering the pause menu screen
+        stopAllMusic();
+        this.setScreen(new PauseMenuScreen(this, gameScreen));
     }
 
     private void playBackgroundMusic() {
@@ -142,9 +141,35 @@ public class MazeRunnerGame extends Game {
         }
     }
 
+    public void playVictoryMusic() {
+        if (!victoryMusic.isPlaying()) {
+            victoryMusic.play();
+        }
+    }
+
+    public void stopVictoryMusic() {
+        if (victoryMusic.isPlaying()) {
+            victoryMusic.stop();
+        }
+    }
+
+    public void playGameOverMusic() {
+        if (!gameOverMusic.isPlaying()) {
+            gameOverMusic.play();
+        }
+    }
+
+    public void stopGameOverMusic() {
+        if (gameOverMusic.isPlaying()) {
+            gameOverMusic.stop();
+        }
+    }
+
     private void stopAllMusic() {
         stopBackgroundMusic();
         stopMazeMusic();
+        stopVictoryMusic();
+        stopGameOverMusic();
     }
 
     public void pauseMazeMusic() {
@@ -184,6 +209,12 @@ public class MazeRunnerGame extends Game {
         }
         if (abilityMusic != null) {
             abilityMusic.dispose();
+        }
+        if (victoryMusic != null) {
+            victoryMusic.dispose();
+        }
+        if (gameOverMusic != null) {
+            gameOverMusic.dispose();
         }
         if (spriteBatch != null) spriteBatch.dispose();
         if (skin != null) skin.dispose();
