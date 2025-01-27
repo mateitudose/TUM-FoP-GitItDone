@@ -67,7 +67,8 @@ public class MazeRunnerGame extends Game {
         if (screen != null) {
             screen.dispose();
         }
-        // Play menu music when entering the menu screen
+        // Stop any currently playing music before transitioning to the menu
+        stopAllMusic();
         playBackgroundMusic();
         this.setScreen(new MenuScreen(this));
     }
@@ -77,6 +78,7 @@ public class MazeRunnerGame extends Game {
             screen.dispose();
         }
         // Ensure background music continues in the map selection screen
+        stopAllMusic();
         playBackgroundMusic();
         this.setScreen(new MapSelectionScreen(this));
     }
@@ -86,7 +88,7 @@ public class MazeRunnerGame extends Game {
             screen.dispose();
         }
         // Stop background music and play maze music when entering the game screen
-        stopBackgroundMusic();
+        stopAllMusic();
         playMazeMusic();
         this.setScreen(new GameScreen(this, mapPath));
     }
@@ -95,7 +97,7 @@ public class MazeRunnerGame extends Game {
         if (screen != null) {
             screen.dispose();
         }
-        // Stop all music and play Game Over music
+        // Stop the maze music before playing Game Over music
         stopAllMusic();
         playGameOverMusic();
         this.setScreen(new GameOverScreen(this, mapPath));
@@ -113,7 +115,7 @@ public class MazeRunnerGame extends Game {
 
     public void goToPauseMenu(GameScreen gameScreen) {
         // Stop all music when entering the pause menu screen
-        stopAllMusic();
+        pauseMazeMusic();
         this.setScreen(new PauseMenuScreen(this, gameScreen));
     }
 
@@ -127,6 +129,10 @@ public class MazeRunnerGame extends Game {
         if (!mazeMusic.isPlaying()) {
             mazeMusic.play();
         }
+    }
+
+    public boolean isMazeMusicPlaying() {
+        return mazeMusic.isPlaying();
     }
 
     public void stopBackgroundMusic() {
