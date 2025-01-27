@@ -110,7 +110,7 @@ public class MazeRunnerGame extends Game {
         // Stop all music and play Victory music
         stopAllMusic();
         playVictoryMusic();
-        this.setScreen(new VictoryScreen(this, hearts, coins, fish));
+        this.setScreen(new VictoryScreen(this, fish));
     }
 
     public void goToPauseMenu(GameScreen gameScreen) {
