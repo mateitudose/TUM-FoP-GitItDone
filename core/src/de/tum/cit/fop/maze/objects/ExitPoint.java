@@ -83,7 +83,6 @@ public class ExitPoint extends GameObject {
         Vector2 playerPosition = player.getBody().getPosition();
         if (Math.abs(playerPosition.x - (this.getX() + 0.5)) < 0.5f &&
                 Math.abs(playerPosition.y - (this.getY() + 0.5)) < 0.5f) {
-            game.goToVictory();
             return true;
         }
         return false;

@@ -451,7 +451,16 @@ public class GameScreen implements Screen {
 
         for (ExitPoint exitPoint : mazeMap.getExitPoints()) {
             if (exitPoint.checkIfPlayerReachedExit(player, game)) {
-                game.goToVictory();
+                int fishCollected = player.getCollectedFish();
+                int coinCollected =0;
+                if( wasAbilityActive)
+                    coinCollected=1;
+                int heartCollected =0;
+                if(heartsToCollect.isEmpty()){
+                    heartCollected=1;
+                }
+                game.goToVictory(heartCollected,coinCollected,fishCollected);
+
                 return;
             }
         }

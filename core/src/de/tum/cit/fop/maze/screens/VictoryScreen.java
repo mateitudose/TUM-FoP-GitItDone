@@ -19,16 +19,25 @@ public class VictoryScreen implements Screen {
 
     private final MazeRunnerGame game;
     private final Stage stage;
+    private int heart;
+    private  int coin;
+    private int fish;
+
 
     /**
      * Constructs a new VictoryScreen object.
      *
      * @param game the main game class
      */
-    public VictoryScreen(MazeRunnerGame game) {
+    public VictoryScreen(MazeRunnerGame game, int heart, int coin, int fish) {
         this.game = game;
         stage = new Stage(new ScreenViewport(), game.getSpriteBatch());
         Gdx.input.setInputProcessor(stage);
+
+         this.heart= heart;
+         this.fish= fish;
+            this.coin= coin;
+
 
         Table table = new Table();
         table.setFillParent(true);
@@ -36,6 +45,19 @@ public class VictoryScreen implements Screen {
 
         // Title
         table.add(new Label("You Won!", game.getSkin(), "title")).padBottom(50).row();
+
+        Label heartLabel = new Label("You collected: " + heart + " hearts", game.getSkin(), "title");
+        heartLabel.setFontScale(0.5f); // Scale the text to 80% of its original size
+        table.add(heartLabel).padBottom(50).row();
+
+        Label fishLabel = new Label("You collected: " + fish + " fish", game.getSkin(), "title");
+        fishLabel.setFontScale(0.5f);
+        table.add(fishLabel).padBottom(50).row();
+
+
+        Label coinLabel = new Label("You collected: " + coin + " coins", game.getSkin(), "title");
+        coinLabel.setFontScale(0.5f);
+        table.add(coinLabel).padBottom(50).row();
 
         // Buttons
         TextButton mainMenuButton = new TextButton("Main Menu", game.getSkin());

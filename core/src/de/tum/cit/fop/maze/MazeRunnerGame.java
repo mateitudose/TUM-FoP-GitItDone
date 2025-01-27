@@ -101,14 +101,14 @@ public class MazeRunnerGame extends Game {
         this.setScreen(new GameOverScreen(this, mapPath));
     }
 
-    public void goToVictory() {
+    public void goToVictory(int hearts, int coins, int fish) {
         if (screen != null) {
             screen.dispose();
         }
         // Stop all music and play Victory music
         stopAllMusic();
         playVictoryMusic();
-        this.setScreen(new VictoryScreen(this));
+        this.setScreen(new VictoryScreen(this, hearts, coins, fish));
     }
 
     public void goToPauseMenu(GameScreen gameScreen) {
