@@ -47,7 +47,7 @@ public class VictoryScreen implements Screen {
 
         // Display stars
         Table starTable = new Table();
-        for (int i = 0; i < fish; i++) {
+        for (int i = 0; i < fish && i <= 3; i++) {
             starTable.add(new Image(starTexture)).pad(5);
         }
         table.add(starTable).padBottom(50).row();
@@ -75,6 +75,11 @@ public class VictoryScreen implements Screen {
         });
     }
 
+    /**
+     * Renders the victory screen.
+     *
+     * @param delta the time in seconds since the last render
+     */
     @Override
     public void render(float delta) {
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -82,6 +87,12 @@ public class VictoryScreen implements Screen {
         stage.draw();
     }
 
+    /**
+     * Resizes the victory screen.
+     *
+     * @param width  the new width
+     * @param height the new height
+     */
     @Override
     public void resize(int width, int height) {
         stage.getViewport().update(width, height, true);

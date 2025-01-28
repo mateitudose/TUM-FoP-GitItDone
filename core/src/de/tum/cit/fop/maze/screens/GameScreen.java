@@ -75,8 +75,6 @@ public class GameScreen implements Screen {
     public GameScreen(MazeRunnerGame game, String mapPath) {
         this.game = game;
         this.mapPath = mapPath;
-        // Uncomment the following line to enable debug rendering of colliders
-//        debugRenderer = new Box2DDebugRenderer();
 
         fishSound = Gdx.audio.newSound(Gdx.files.internal("assets/chewing.mp3"));
         slowTileSound = Gdx.audio.newSound(Gdx.files.internal("assets/slowmo.mp3"));
@@ -410,12 +408,6 @@ public class GameScreen implements Screen {
         rayHandler.setCombinedMatrix(camera);
         rayHandler.updateAndRender();
 
-        // Debug rendering of all colliders, uncomment to enable
-//        Matrix4 scaledMatrix = new Matrix4(camera.combined);
-//        scaledMatrix.scale(16f, 16f, 16f);
-//
-//        debugRenderer.render(gameWorld, scaledMatrix);
-
         // Update Box2D world
         gameWorld.step(1 / 60f, 6, 2);
     }
@@ -452,15 +444,14 @@ public class GameScreen implements Screen {
         for (ExitPoint exitPoint : mazeMap.getExitPoints()) {
             if (exitPoint.checkIfPlayerReachedExit(player, game)) {
                 int fishCollected = player.getCollectedFish();
-                int coinCollected =0;
-                if( wasAbilityActive)
-                    coinCollected=1;
-                int heartCollected =0;
-                if(heartsToCollect.isEmpty()){
-                    heartCollected=1;
+                int coinCollected = 0;
+                if (wasAbilityActive)
+                    coinCollected = 1;
+                int heartCollected = 0;
+                if (heartsToCollect.isEmpty()) {
+                    heartCollected = 1;
                 }
-                game.goToVictory(heartCollected,coinCollected,fishCollected);
-
+                game.goToVictory(heartCollected, coinCollected, fishCollected);
                 return;
             }
         }

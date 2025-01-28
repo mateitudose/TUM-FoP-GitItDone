@@ -16,7 +16,7 @@ import de.tum.cit.fop.maze.MazeMap;
  * Represents the player entity in the maze game.
  */
 public class Player extends GameEntity {
-    private static final float MOVE_SPEED = 4.0f;
+    private static final float MOVE_SPEED = 2.0f;
     public static final int PLAYER_LIVES = 4;
     private float speed;
     private World world;

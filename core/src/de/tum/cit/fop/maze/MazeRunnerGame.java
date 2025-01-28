@@ -8,6 +8,10 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import de.tum.cit.fop.maze.screens.*;
 import games.spooky.gdx.nativefilechooser.NativeFileChooser;
 
+/**
+ * The MazeRunnerGame class represents the core of the Maze Runner game.
+ * It manages the screens and global resources like SpriteBatch and Skin.
+ */
 public class MazeRunnerGame extends Game {
     // Screens
     private MenuScreen menuScreen;
@@ -31,10 +35,18 @@ public class MazeRunnerGame extends Game {
     private Music victoryMusic; // New Music for Victory
     private Music gameOverMusic; // New Music for Game Over
 
+    /**
+     * Constructor for MazeRunnerGame.
+     *
+     * @param fileChooser The file chooser for the game, typically used in desktop environment.
+     */
     public MazeRunnerGame(NativeFileChooser fileChooser) {
         super();
     }
 
+    /**
+     * Called when the game is created. Initializes the SpriteBatch, Skin, and music.
+     */
     @Override
     public void create() {
         spriteBatch = new SpriteBatch();
@@ -68,7 +80,8 @@ public class MazeRunnerGame extends Game {
             screen.dispose();
         }
         // Stop any currently playing music before transitioning to the menu
-        stopAllMusic();
+        stopVictoryMusic();
+        stopGameOverMusic();
         playBackgroundMusic();
         this.setScreen(new MenuScreen(this));
     }
@@ -78,7 +91,6 @@ public class MazeRunnerGame extends Game {
             screen.dispose();
         }
         // Ensure background music continues in the map selection screen
-        stopAllMusic();
         playBackgroundMusic();
         this.setScreen(new MapSelectionScreen(this));
     }
