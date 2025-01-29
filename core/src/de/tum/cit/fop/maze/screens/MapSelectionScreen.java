@@ -2,14 +2,19 @@ package de.tum.cit.fop.maze.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.*;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
+import com.badlogic.gdx.files.FileHandle;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 
 /**
  * Represents the screen for selecting a map in the game.
@@ -17,6 +22,8 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
 public class MapSelectionScreen implements Screen {
     private final MazeRunnerGame game;
     private final Stage stage;
+    private final Texture backgroundTexture;
+    private final Image backgroundImage;
 
     /**
      * Constructs a new MapSelectionScreen object.
@@ -27,6 +34,14 @@ public class MapSelectionScreen implements Screen {
         this.game = game;
         stage = new Stage(new ScreenViewport(), game.getSpriteBatch());
         Gdx.input.setInputProcessor(stage);
+
+        // Load the background texture
+        backgroundTexture = new Texture(Gdx.files.internal("whiskered_thief_wp.png"));
+        backgroundImage = new Image(backgroundTexture);
+
+        backgroundImage.setScaling(Scaling.fill);
+        backgroundImage.setFillParent(true);
+        stage.addActor(backgroundImage);
 
         Table table = new Table();
         table.setFillParent(true);
@@ -90,6 +105,7 @@ public class MapSelectionScreen implements Screen {
     @Override
     public void dispose() {
         stage.dispose();
+        backgroundTexture.dispose();
     }
 
     @Override

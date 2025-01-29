@@ -4,12 +4,17 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import de.tum.cit.fop.maze.MazeRunnerGame;
@@ -19,33 +24,34 @@ import de.tum.cit.fop.maze.MazeRunnerGame;
  * It extends the LibGDX Screen class and sets up the UI components for the menu.
  */
 public class MenuScreen implements Screen {
-
     private final Stage stage;
+    private final Texture backgroundTexture;
+    private final Image backgroundImage;
 
-    /**
-     * Constructor for MenuScreen. Sets up the camera, viewport, stage, and UI elements.
-     *
-     * @param game The main game class, used to access global resources and methods.
-     */
     public MenuScreen(MazeRunnerGame game) {
+        // Load the background texture
+        backgroundTexture = new Texture(Gdx.files.internal("whiskered_thief_wp.png"));
+        backgroundImage = new Image(backgroundTexture);
+
         var camera = new OrthographicCamera();
-        camera.zoom = 1.5f; // Set camera zoom for a closer view
+        camera.zoom = 1f;
 
-        Viewport viewport = new ScreenViewport(camera); // Create a viewport with the camera
-        stage = new Stage(viewport, game.getSpriteBatch()); // Create a stage for UI elements
+        Viewport viewport = new ScreenViewport(camera);
+        stage = new Stage(viewport, game.getSpriteBatch());
 
-        Table table = new Table(); // Create a table for layout
-        table.setFillParent(true); // Make the table fill the stage
-        stage.addActor(table); // Add the table to the stage
+        backgroundImage.setScaling(Scaling.fill);
+        backgroundImage.setFillParent(true);
+        stage.addActor(backgroundImage);
 
-        // Add a label as a title
-        table.add(new Label("A Whiskered Thief", game.getSkin(), "title")).padBottom(80).row();
+        Table table = new Table();
+        table.setFillParent(true);
+        stage.addActor(table);
 
-        // Create and add a button to go to the game screen
-        TextButton goToMapSelectionButton = new TextButton("Play Game", game.getSkin());
-        table.add(goToMapSelectionButton).width(300).row();
+        table.add(new Label("A Whiskered Thief", game.getSkin(), "title")).padBottom(160).row();
+        TextButton playButton = new TextButton("Play Game", game.getSkin());
+        table.add(playButton).width(300).row();
 
-        goToMapSelectionButton.addListener(new ChangeListener() {
+        playButton.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
                 game.goToMapSelection();
@@ -67,8 +73,8 @@ public class MenuScreen implements Screen {
 
     @Override
     public void dispose() {
-        // Dispose of the stage when screen is disposed
         stage.dispose();
+        backgroundTexture.dispose();
     }
 
     @Override

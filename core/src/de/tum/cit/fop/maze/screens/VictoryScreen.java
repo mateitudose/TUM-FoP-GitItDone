@@ -49,8 +49,8 @@ public class VictoryScreen implements Screen {
         Table starTable = new Table();
         for (int i = 0; i < fish && i <= 3; i++) {
             Image starImage = new Image(starTexture);
-            starImage.setSize(60, 60);
-            starTable.add(starImage).size(60,60).pad(5);
+            starImage.setSize(160, 160);
+            starTable.add(starImage).size(160,160).pad(5);
         }
         table.add(starTable).padBottom(50).row();
 
