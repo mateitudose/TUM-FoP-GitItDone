@@ -178,18 +178,17 @@ public class Player extends GameEntity {
             effectiveSpeed *= 2;
         }
 
-        // TODO: Modify the key bindings to use the arrow keys
         float velX = 0, velY = 0;
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
+        if (Gdx.input.isKeyPressed(Input.Keys.LEFT)) {
             velX = -effectiveSpeed;
             currentDirection = "left";
-        } else if (Gdx.input.isKeyPressed(Input.Keys.D)) {
+        } else if (Gdx.input.isKeyPressed(Input.Keys.RIGHT)) {
             velX = effectiveSpeed;
             currentDirection = "right";
-        } else if (Gdx.input.isKeyPressed(Input.Keys.W)) {
+        } else if (Gdx.input.isKeyPressed(Input.Keys.UP)) {
             velY = effectiveSpeed;
             currentDirection = "up";
-        } else if (Gdx.input.isKeyPressed(Input.Keys.S)) {
+        } else if (Gdx.input.isKeyPressed(Input.Keys.DOWN)) {
             velY = -effectiveSpeed;
             currentDirection = "down";
         }
