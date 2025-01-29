@@ -41,6 +41,12 @@ Below is an overview of the main packages and classes:
     - `Algorithm`: The Algorithm class implements the A* pathfinding algorithm and all related functionalities.
     - `Node`: Represents a node in the A* pathfinding algorithm.
 
+## UML Diagrams
+
+Each package contains in its folder a UML diagram in PNG format that shows the classes and their relationships within the package.
+
+Additionally, the UML diagrams contain the methods and fields of each class.
+
 ## Game Mechanics
 
 ### Player
@@ -64,3 +70,17 @@ Below is an overview of the main packages and classes:
 
 - **Dizziness**: Enemies can become dizzy for a certain duration, during which they stop moving and turn gray.
 - **Pathfinding**: Enemies use the A* algorithm to chase the player when in proximity.
+
+## Instructions to run the game
+
+1. Clone the repository to your local machine.
+2. Open the project in IntelliJ IDEA.
+3. Run the `Run Game` pre-configured task.
+
+### Possible issues when running the game
+
+- If the game does not run, make sure that you also check these points:
+    - The project is imported correctly.
+    - You may have to adapt the classpath setting in the run configuration: choose the one ending in '.desktop.main'.
+    - Make sure that Gradle JVM is set to use the same JDK version as the project.
+    - If running on Mac, make sure to add the following VM option to the run configuration: `-XstartOnFirstThread`. On Windows/Linux, this option must not be set.
