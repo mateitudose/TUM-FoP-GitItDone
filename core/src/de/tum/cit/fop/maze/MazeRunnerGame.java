@@ -128,6 +128,7 @@ public class MazeRunnerGame extends Game {
     public void goToPauseMenu(GameScreen gameScreen) {
         // Stop all music when entering the pause menu screen
         pauseMazeMusic();
+        playBackgroundMusic();
         this.setScreen(new PauseMenuScreen(this, gameScreen));
     }
 
