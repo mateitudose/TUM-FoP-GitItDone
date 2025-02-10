@@ -1,4 +1,5 @@
 # A Whiskered Thief - FoP WiSe 2024/25, Team GitItDone
+<img width="1322" alt="Screenshot 2025-02-10 at 19 24 38" src="https://github.com/user-attachments/assets/db26108b-bd2d-4fde-8295-d866e0c86d81" />
 
 ## Project Structure
 
